@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "DIY Game Maker",
+  "name": "Tool to make minigames on-the-go",
   "icons": [
     {
       "src": "favicon.ico",

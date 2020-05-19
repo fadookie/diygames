@@ -3,25 +3,35 @@ import React, {
 } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import Gui from './components/Gui';
+import { GameProvider } from './state/GameContext';
+import Editor from './components/Editor';
+import GamePlayer from './components/GamePlayer';
 
 const App = () => {
-  const [activeComponent, setActiveComponent] = useState('GuiTest');
+  const [activeComponent, setActiveComponent] = useState('Editor');
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <button onClick={() => setActiveComponent('GuiTest')}>GUI Test</button>
-        {(() => {
-          switch (activeComponent) {
-            case 'GuiTest':
-              return <Gui />;
-            default:
-              return `Unknown component ${activeComponent}`;
-          }
-        })()}
-      </header>
-    </div>
+    <GameProvider>
+      <div className="App">
+        <header className="App-header">
+          <img src={logo} className="App-logo" alt="logo" />
+          <button onClick={() => setActiveComponent('Editor')}>Editor</button>
+          <button onClick={() => setActiveComponent('Player')}>Player</button>
+        </header>
+        <hr/>
+        <div className="body">
+          {(() => {
+            switch (activeComponent) {
+              case 'Editor':
+                return <Editor />;
+              case 'Player':
+                return <GamePlayer />;
+              default:
+                return `Unknown component ${activeComponent}`;
+            }
+          })()}
+        </div>
+      </div>
+    </GameProvider>
   );
 };
 

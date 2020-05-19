@@ -1,11 +1,10 @@
 import React, { useContext } from 'react';
 import _ from 'lodash';
 import GamePlayer from './GamePlayer.js';
-import GameContext, { GameProvider } from '../state/GameContext';
+import GameContext from '../state/GameContext';
+import './Editor.css';
 
-const { useState } = React;
-
-function Gui() {
+function Editor() {
   const context = useContext(GameContext);
   const { gameState, gameDispatch } = context;
   const addTestObject = () => {
@@ -24,6 +23,7 @@ function Gui() {
       },
     });
   };
+
   const removeTestObject = () => {
     if (Object.keys(gameState.objects).length < 1) return;
     gameDispatch({
@@ -31,12 +31,13 @@ function Gui() {
       objectId: Object.keys(gameState.objects)[0],
     });
   };
+
   const shiftBgColor = (amount) => {
     gameDispatch({ type: 'setBgColor', color: gameState.bgColor + amount });
   };
+
   return (
-    <div className="container p-b-md p-r-md p-l-md has-text-centered">
-      <hr />
+    <div className="container">
       Controls:<br />
       <button className="button" onClick={addTestObject}>
         Add Test Object
@@ -54,20 +55,12 @@ function Gui() {
       <button className="button" onClick={shiftBgColor.bind(null, -10)}>
         BG Color-
       </button>
-      <GamePlayer scene={gameState} />
+      <GamePlayer />
       <br />
       Objects:
-      <pre style={{ textAlign: 'left' }}>{`GameState: ${JSON.stringify(gameState, undefined, 2)}`}</pre>
+      <pre class="codePreview">{`GameState: ${JSON.stringify(gameState, undefined, 2)}`}</pre>
     </div>
   );
 }
 
-function GuiWithContext() {
-  return (
-    <GameProvider>
-      <Gui />
-    </GameProvider>
-  );
-}
-
-export default GuiWithContext;
+export default Editor;

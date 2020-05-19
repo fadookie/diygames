@@ -1,5 +1,6 @@
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useContext } from 'react';
 import P5 from 'p5';
+import GameContext from '../state/GameContext';
 
 function createSketch(scene, node) {
   if (!node) return;
@@ -37,10 +38,13 @@ function createSketch(scene, node) {
   new P5(sketch, node);
 }
 
-function GamePlayer({ scene }) {
+function GamePlayer() {
+  const context = useContext(GameContext);
+  const { gameState, gameDispatch } = context;
+
   useEffect(createSketch, []);
   const sceneRef = useRef({});
-  sceneRef.current = scene;
+  sceneRef.current = gameState;
   const sketchContainerRef = useCallback(createSketch.bind(null, sceneRef), []);
   return (
     <div className="container p-b-md p-r-md p-l-md has-text-centered">
