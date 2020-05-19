@@ -14,8 +14,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "deploy": "aws --profile eliot s3 sync --delete --acl public-read build 's3://eliotwarediy' && aws --profile eliot cloudfront create-invalidation --distribution-id E11IUTYOF52MIC --paths '/*'",
-    "build-and-deploy": "npm run build && npm run deploy",
+    "deploy": "./deploy.sh",
+    "build-and-deploy": "yarn build && yarn run deploy",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
