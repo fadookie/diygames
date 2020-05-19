@@ -1,26 +1,26 @@
 import _ from 'lodash';
 
 // type Scene = {
-//   [objects : string]: 
+//   [entities : string]: 
 // }
 
 export const initialState = {
-  objects: {},
+  entities: {},
   bgColor: 0,
 };
 Object.freeze(initialState);
 
 export default (state, action) => {
   switch (action.type) {
-    case 'setObjects': {
-      return { ...state, objects: { ...state.objects, ...action.objects } };
-    } case 'removeObject': {
-      return { ...state, objects: _.omit(state.objects, [action.objectId]) };
-    } case 'clearObjects': {
-      return { ...state, objects: {} };
+    case 'setEntities': {
+      return { ...state, entities: { ...state.entities, ...action.entities } };
+    } case 'removeEntities': {
+      return { ...state, entities: _.omit(state.entities, action.entityIds) };
+    } case 'clearEntities': {
+      return { ...state, entities: {} };
     } case 'setBgColor': {
       return { ...state, bgColor: _.clamp(action.color, 0, 255) };
     } default:
-      throw new Error();
+      throw new Error(`Unknown action type:'${action.type}'`);
   }
 };

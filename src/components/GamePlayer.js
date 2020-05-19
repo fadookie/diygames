@@ -11,11 +11,11 @@ function createSketch(scene, node) {
       // p.colorMode(p.HSB);
     };
     p.draw = () => {
-      const { bgColor, objects } = scene.current;
+      const { bgColor, entities } = scene.current;
       p.background(bgColor);
 
-      Object.keys(objects).forEach((key) => {
-        const o = objects[key];
+      Object.keys(entities).forEach((key) => {
+        const o = entities[key];
         console.log(`@@@ draw ${key}:`, o);
         p.push();
         if (o.strokeColor) {

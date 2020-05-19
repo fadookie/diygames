@@ -7,12 +7,12 @@ import './Editor.css';
 function Editor() {
   const context = useContext(GameContext);
   const { gameState, gameDispatch } = context;
-  const addTestObject = () => {
+  const addTestEntity = () => {
     const id = parseInt(_.uniqueId(), 10);
     gameDispatch({
-      type: 'setObjects',
-      objects: {
-        [`testObject_${id}`]: {
+      type: 'setEntities',
+      entities: {
+        [`testEntity_${id}`]: {
           transform: {
             pos: { x: id * 20, y: 10 },
             size: { w: 10, h: 10 },
@@ -24,11 +24,11 @@ function Editor() {
     });
   };
 
-  const removeTestObject = () => {
-    if (Object.keys(gameState.objects).length < 1) return;
+  const removeTestEntity = () => {
+    if (Object.keys(gameState.entities).length < 1) return;
     gameDispatch({
-      type: 'removeObject',
-      objectId: Object.keys(gameState.objects)[0],
+      type: 'removeEntities',
+      entityIds: [Object.keys(gameState.entities)[0]],
     });
   };
 
@@ -39,14 +39,14 @@ function Editor() {
   return (
     <div className="container">
       Controls:<br />
-      <button className="button" onClick={addTestObject}>
-        Add Test Object
+      <button className="button" onClick={addTestEntity}>
+        Add Test Entity
       </button>
-      <button className="button" onClick={removeTestObject}>
-        Remove Test Object
+      <button className="button" onClick={removeTestEntity}>
+        Remove Test Entity
       </button>
-      <button className="button" onClick={() => gameDispatch({ type: 'clearObjects' })}>
-        ClearObjects
+      <button className="button" onClick={() => gameDispatch({ type: 'clearEntities' })}>
+        Clear Entities
       </button>
       <br />
       <button className="button" onClick={shiftBgColor.bind(null, 10)}>
@@ -57,7 +57,7 @@ function Editor() {
       </button>
       <GamePlayer />
       <br />
-      Objects:
+      Scene:
       <pre class="codePreview">{`GameState: ${JSON.stringify(gameState, undefined, 2)}`}</pre>
     </div>
   );
