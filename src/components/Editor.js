@@ -13,12 +13,16 @@ function Editor() {
       type: 'addEntities',
       entities: [{
         id,
-        transform: {
-          pos: { x: _.random(0, 200), y: _.random(0, 200) },
-          size: { w: 10, h: 10 },
-        },
-        strokeColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
-        fillColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
+        components: {
+          Transform: {
+            pos: { x: _.random(0, 200), y: _.random(0, 200) },
+            size: { w: 10, h: 10 },
+          },
+          Renderer: {
+            strokeColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
+            fillColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
+          }
+        }
       }],
     });
   };
@@ -27,10 +31,10 @@ function Editor() {
   const addDuplicateEntity = addEntity.bind(null, 'duplicateEntity');
 
   const removeTestEntity = () => {
-    if (Object.keys(gameState.entities).length < 1) return;
+    if (gameState.entities.length < 1) return;
     gameDispatch({
       type: 'removeEntities',
-      entityIds: [Object.keys(gameState.entities)[0]],
+      entityIds: [gameState.entities[0].id],
     });
   };
 

@@ -1,6 +1,8 @@
 import React, { useEffect, useCallback, useRef, useContext } from 'react';
 import P5 from 'p5';
+import _ from 'lodash';
 import GameContext from '../state/GameContext';
+import renderSystem from '../systems/renderSystem';
 
 function createSketch(sceneRef, sketchRef, node) {
   if (!node) return;
@@ -11,30 +13,20 @@ function createSketch(sceneRef, sketchRef, node) {
       // p.colorMode(p.HSB);
     };
     p.draw = () => {
-      const { bgColor, entities } = sceneRef.current;
+      const { bgColor } = sceneRef.current;
       p.background(bgColor);
 
-      entities.forEach((o) => {
-        // console.log(`@@@ draw ${key}:`, o);
-        p.push();
-        if (o.strokeColor) {
-          p.stroke(...o.strokeColor);
-        } else {
-          p.noStroke();
-        }
-        if (o.fillColor) {
-          p.fill(...o.fillColor);
-        } else {
-          p.noFill();
-        }
-        p.translate(o.transform.pos.x, o.transform.pos.y);
-        p.rect(0, 0, o.transform.size.w, o.transform.size.h);
-        p.pop();
-      });
+      renderSystem(p, renderSystem.entities);
     };
   };
-  sketch.onSceneChanged = () => {
-    console.log('@@@ sketch#onSceneChanged', sceneRef.current);
+  sketch.onSceneChanged = (scene) => {
+    console.log('@@@ sketch#onSceneChanged', scene);
+    renderSystem.entities = scene.entities.filter(
+      entity => _.difference(
+        ['Transform', 'Renderer'],
+        Object.keys(entity.components)
+      ).length === 0
+    );
   }
   // eslint-disable-next-line no-new
   new P5(sketch, node);
@@ -52,7 +44,7 @@ function GamePlayer() {
 
   useEffect(() => {
     if (sketchRef.current) {
-      sketchRef.current.onSceneChanged();
+      sketchRef.current.onSceneChanged(sceneRef.current);
     }
   }, [gameState]);
   return (

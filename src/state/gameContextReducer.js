@@ -23,7 +23,7 @@ export default (state, action) => {
       });
     } case 'removeEntities': {
       return produce(state, next => {
-        _.remove(next.entities, entity => action.entityIds.includes(entity)); 
+        _.remove(next.entities, entity => action.entityIds.includes(entity.id)); 
       });
     } case 'clearEntities': {
       return { ...state, entities: [] };
