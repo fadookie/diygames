@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import produce from 'immer';
 
 // type Scene = {
 //   [entities : string]: 
@@ -13,7 +14,9 @@ Object.freeze(initialState);
 export default (state, action) => {
   switch (action.type) {
     case 'setEntities': {
-      return { ...state, entities: { ...state.entities, ...action.entities } };
+      return produce(state, next => {
+        Object.assign(next.entities, action.entities); 
+      });
     } case 'removeEntities': {
       return { ...state, entities: _.omit(state.entities, action.entityIds) };
     } case 'clearEntities': {
