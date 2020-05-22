@@ -2,9 +2,11 @@ import React, { useEffect, useCallback, useRef, useContext } from 'react';
 import P5 from 'p5';
 import _ from 'lodash';
 import GameContext from '../state/GameContext';
-import renderSystem from '../systems/renderSystem';
+import EcsManager from '../systems/EcsManager';
 
 function createSketch(sceneRef, sketchRef, node) {
+  let ecsManager = new EcsManager();
+  ecsManager.onSceneChanged(sceneRef.current);
   if (!node) return;
   const sketch = (p5instance) => {
     const p = p5instance;
@@ -13,20 +15,17 @@ function createSketch(sceneRef, sketchRef, node) {
       // p.colorMode(p.HSB);
     };
     p.draw = () => {
+      ecsManager.onUpdate(sceneRef.current);
+
       const { bgColor } = sceneRef.current;
       p.background(bgColor);
 
-      renderSystem(p, renderSystem.entities);
+      ecsManager.onDraw(sceneRef.current, p);
     };
   };
   sketch.onSceneChanged = (scene) => {
     console.log('@@@ sketch#onSceneChanged', scene);
-    renderSystem.entities = scene.entities.filter(
-      entity => _.difference(
-        ['Transform', 'Renderer'],
-        Object.keys(entity.components)
-      ).length === 0
-    );
+    ecsManager.onSceneChanged(scene);
   }
   // eslint-disable-next-line no-new
   new P5(sketch, node);

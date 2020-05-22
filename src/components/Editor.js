@@ -21,7 +21,13 @@ function Editor() {
           Renderer: {
             strokeColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
             fillColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
-          }
+          },
+          DirectionalMovement: {
+            velocity: {
+              x: 1,
+              y: 0,
+            },
+          },
         }
       }],
     });
