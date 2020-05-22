@@ -10,17 +10,16 @@ function Editor() {
   const addTestEntity = () => {
     const id = parseInt(_.uniqueId(), 10);
     gameDispatch({
-      type: 'setEntities',
-      entities: {
-        [`testEntity_${id}`]: {
-          transform: {
-            pos: { x: id * 20, y: 10 },
-            size: { w: 10, h: 10 },
-          },
-          strokeColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
-          fillColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
+      type: 'addEntities',
+      entities: [{
+        id: [`testEntity_${id}`],
+        transform: {
+          pos: { x: id * 20, y: 10 },
+          size: { w: 10, h: 10 },
         },
-      },
+        strokeColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
+        fillColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
+      }],
     });
   };
 
@@ -58,7 +57,7 @@ function Editor() {
       <GamePlayer />
       <br />
       Scene:
-      <pre class="codePreview">{`GameState: ${JSON.stringify(gameState, undefined, 2)}`}</pre>
+      <pre className="codePreview">{`GameState: ${JSON.stringify(gameState, undefined, 2)}`}</pre>
     </div>
   );
 }

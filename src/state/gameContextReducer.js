@@ -6,19 +6,21 @@ import produce from 'immer';
 // }
 
 export const initialState = {
-  entities: {},
+  entities: [],
   bgColor: 0,
 };
 Object.freeze(initialState);
 
 export default (state, action) => {
   switch (action.type) {
-    case 'setEntities': {
+    case 'addEntities': {
       return produce(state, next => {
-        Object.assign(next.entities, action.entities); 
+        next.entities.push(...action.entities); 
       });
     } case 'removeEntities': {
-      return { ...state, entities: _.omit(state.entities, action.entityIds) };
+      return produce(state, next => {
+        _.remove(next.entities, entity => action.entityIds.contains(entity)); 
+      });
     } case 'clearEntities': {
       return { ...state, entities: {} };
     } case 'setBgColor': {

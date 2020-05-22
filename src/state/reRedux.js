@@ -14,7 +14,7 @@ const useRedux = (reducer, initialState, storageKey) => {
   const [state] = redux;
   useEffect(() => {
     window.localStorage.setItem(storageKey, JSON.stringify(state));
-  }, [state]);
+  }, [state, storageKey]);
   return redux;
 };
 

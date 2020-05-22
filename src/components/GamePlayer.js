@@ -2,7 +2,7 @@ import React, { useEffect, useCallback, useRef, useContext } from 'react';
 import P5 from 'p5';
 import GameContext from '../state/GameContext';
 
-function createSketch(scene, node) {
+function createSketch(sceneRef, sketchRef, node) {
   if (!node) return;
   const sketch = (p5instance) => {
     const p = p5instance;
@@ -11,12 +11,11 @@ function createSketch(scene, node) {
       // p.colorMode(p.HSB);
     };
     p.draw = () => {
-      const { bgColor, entities } = scene.current;
+      const { bgColor, entities } = sceneRef.current;
       p.background(bgColor);
 
-      Object.keys(entities).forEach((key) => {
-        const o = entities[key];
-        console.log(`@@@ draw ${key}:`, o);
+      entities.forEach((o) => {
+        // console.log(`@@@ draw ${key}:`, o);
         p.push();
         if (o.strokeColor) {
           p.stroke(...o.strokeColor);
@@ -34,18 +33,28 @@ function createSketch(scene, node) {
       });
     };
   };
+  sketch.onSceneChanged = () => {
+    console.log('@@@ sketch#onSceneChanged', sceneRef.current);
+  }
   // eslint-disable-next-line no-new
   new P5(sketch, node);
+  sketchRef.current = sketch;
 }
 
 function GamePlayer() {
   const context = useContext(GameContext);
   const { gameState, gameDispatch } = context;
 
-  useEffect(createSketch, []);
   const sceneRef = useRef({});
+  const sketchRef = useRef(null);
   sceneRef.current = gameState;
-  const sketchContainerRef = useCallback(createSketch.bind(null, sceneRef), []);
+  const sketchContainerRef = useCallback(createSketch.bind(null, sceneRef, sketchRef), []);
+
+  useEffect(() => {
+    if (sketchRef.current) {
+      sketchRef.current.onSceneChanged();
+    }
+  }, [gameState]);
   return (
     <div className="container p-b-md p-r-md p-l-md has-text-centered">
       GamePlayer
