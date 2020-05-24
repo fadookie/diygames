@@ -1,6 +1,6 @@
 function directionalMovementSystem(entities) {
   entities.forEach((e) => {
-    const transform = e.runtimeComponents.Transform;
+    const transform = e.components.Transform;
     const movement = e.components.DirectionalMovement;
     transform.pos.x += movement.velocity.x;
     transform.pos.y += movement.velocity.y;

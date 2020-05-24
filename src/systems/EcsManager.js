@@ -1,11 +1,9 @@
 import _ from 'lodash';
 import renderSystem from './renderSystem';
-import transformSetupSystem from './transformSetupSystem';
 import directionalMovementSystem from './directionalMovementSystem';
 
 export default class EcsManager {
   setupSystems = [
-    transformSetupSystem,
   ]
 
   updateSystems = [
@@ -28,11 +26,8 @@ export default class EcsManager {
     // Re-create runtime entity instances
     this.runtimeEntities = scene.entities.map(entity => ({
       id: entity.id,
-      runtimeComponents: {},
+      components: _.cloneDeep(entity.components),
       sceneEntity: entity,
-      get components() {
-        return { ...this.sceneEntity.components, ...this.runtimeComponents };
-      },
       get componentTypes() {
         return Object.keys(this.components);
       }

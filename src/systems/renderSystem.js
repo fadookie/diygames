@@ -1,7 +1,7 @@
 function renderSystem(p5, entities) {
   entities.forEach((e) => {
     const renderComp = e.components.Renderer;
-    const transform = e.runtimeComponents.Transform;
+    const transform = e.components.Transform;
     console.log(`@@@ render e:${e.id} at:`, transform);
     p5.push();
     if (renderComp.strokeColor) {
