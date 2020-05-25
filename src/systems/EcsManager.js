@@ -1,28 +1,23 @@
 import _ from 'lodash';
 import { Subject } from 'rxjs';
-import renderSystem from './renderSystem';
-import directionalMovementSystem from './directionalMovementSystem';
-import scriptSetupSystem from './scriptSetupSystem';
-import scriptSystem from './scriptSystem';
-import inputSystem from './inputSystem';
+import RenderSystem from './RenderSystem';
+import DirectionalMovementSystem from './DirectionalMovementSystem';
+import ScriptSystem from './ScriptSystem';
+import InputSystem from './InputSystem';
 
 export default class EcsManager {
-  setupSystems = [
-    scriptSetupSystem,
-  ]
-
   updateSystems = [
-    inputSystem,
-    scriptSystem,
-    directionalMovementSystem,
+    new InputSystem(),
+    new ScriptSystem(),
+    new DirectionalMovementSystem(),
   ]
 
   drawSystems = [
-    renderSystem,
+    new RenderSystem(),
   ]
 
   get systems() {
-    return _.uniq([...this.setupSystems, ...this.updateSystems, ...this.drawSystems]);
+    return _.uniq([...this.updateSystems, ...this.drawSystems]);
   }
 
   runtimeEntities = [];
@@ -74,20 +69,20 @@ export default class EcsManager {
       });
     });
 
-    this.setupSystems.forEach(setupSystem => {
-      setupSystem(setupSystem.entities);
+    this.systems.forEach(system => {
+      system.setup && system.setup(system.entities);
     });
   }
 
   onUpdate(scene) {
-    this.updateSystems.forEach(updateSystem => {
-      updateSystem(updateSystem.entities, { p5: this.p5, globalEventBus: this.globalEventBus });
+    this.updateSystems.forEach(system => {
+      system.execute && system.execute(system.entities, { p5: this.p5, globalEventBus: this.globalEventBus });
     });
   }
 
   onDraw(scene) {
-    this.drawSystems.forEach(drawSystem => {
-      drawSystem(drawSystem.entities, { p5: this.p5, globalEventBus: this.globalEventBus });
+    this.drawSystems.forEach(system => {
+      system.execute && system.execute(system.entities, { p5: this.p5, globalEventBus: this.globalEventBus });
     });
   }
 
