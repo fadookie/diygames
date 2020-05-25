@@ -5,11 +5,12 @@ import GameContext from '../state/GameContext';
 import EcsManager from '../systems/EcsManager';
 
 function createSketch(sceneRef, sketchRef, node) {
-  let ecsManager = new EcsManager();
-  ecsManager.onSceneChanged(sceneRef.current);
   if (!node) return;
+  let ecsManager;
   const sketch = (p5instance) => {
     const p = p5instance;
+    ecsManager = new EcsManager(p);
+    ecsManager.onSceneChanged(sceneRef.current);
     p.setup = () => {
       p.createCanvas(500, 500);
       // p.colorMode(p.HSB);
@@ -20,8 +21,9 @@ function createSketch(sceneRef, sketchRef, node) {
       const { bgColor } = sceneRef.current;
       p.background(bgColor);
 
-      ecsManager.onDraw(sceneRef.current, p);
+      ecsManager.onDraw(sceneRef.current);
     };
+    p.mousePressed = ecsManager.mousePressed.bind(ecsManager);
   };
   sketch.onSceneChanged = (scene) => {
     console.log('@@@ sketch#onSceneChanged', scene);

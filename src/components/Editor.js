@@ -22,13 +22,23 @@ function Editor() {
             strokeColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
             fillColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
           },
-          DirectionalMovement: {
-            velocity: {
-              x: 1,
-              y: 0,
+          // DirectionalMovement: {
+          //   velocity: {
+          //     x: 1,
+          //     y: 0,
+          //   },
+          // },
+          Scripts: [
+            {
+              triggers: [
+                { type: 'TapTrigger', target:'Anywhere' }
+              ],
+              actions: [
+                { type: 'DirectionalMovement', velocity: { x: 1, y: 0 }}
+              ],
             },
-          },
-        }
+          ],
+        },
       }],
     });
   };

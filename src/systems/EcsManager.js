@@ -1,12 +1,19 @@
 import _ from 'lodash';
+import { Subject } from 'rxjs';
 import renderSystem from './renderSystem';
 import directionalMovementSystem from './directionalMovementSystem';
+import scriptSetupSystem from './scriptSetupSystem';
+import scriptSystem from './scriptSystem';
+import inputSystem from './inputSystem';
 
 export default class EcsManager {
   setupSystems = [
+    scriptSetupSystem,
   ]
 
   updateSystems = [
+    inputSystem,
+    scriptSystem,
     directionalMovementSystem,
   ]
 
@@ -19,20 +26,40 @@ export default class EcsManager {
   }
 
   runtimeEntities = [];
+  globalEventBus = new Subject();
 
-  recievedFirstSceneUpdate = false
+  constructor(p5) {
+    this.p5 = p5;
+  }
+
+  onComponentsChanged(entity) {
+    this.onTargetGroupsChanged();
+  }
 
   onSceneChanged(scene) {
     // Re-create runtime entity instances
+    const onComponentsChanged = this.onComponentsChanged.bind(this);
     this.runtimeEntities = scene.entities.map(entity => ({
       id: entity.id,
       components: _.cloneDeep(entity.components),
       sceneEntity: entity,
       get componentTypes() {
         return Object.keys(this.components);
-      }
+      },
+      addComponent(componentName, component) {
+        this.components[componentName] = component;
+        onComponentsChanged(this);
+      },
+      removeComponent(componentName) {
+        delete this.components[componentName];
+        onComponentsChanged(this);
+      },
     }));
+    
+    this.onTargetGroupsChanged();
+  }
 
+  onTargetGroupsChanged() {
     // Update system's entity list based on components required by targetGroup filter
     this.systems.forEach(system => {
       console.log('@@@onSceneChanged filter for ', system.name);
@@ -50,21 +77,21 @@ export default class EcsManager {
     this.setupSystems.forEach(setupSystem => {
       setupSystem(setupSystem.entities);
     });
-
-    // this.recievedFirstSceneUpdate = true;
   }
 
   onUpdate(scene) {
-    // if (!this.recievedFirstSceneUpdate) return;
     this.updateSystems.forEach(updateSystem => {
-      updateSystem(updateSystem.entities);
+      updateSystem(updateSystem.entities, { p5: this.p5, globalEventBus: this.globalEventBus });
     });
   }
 
-  onDraw(scene, p5) {
-    // if (!this.recievedFirstSceneUpdate) return;
+  onDraw(scene) {
     this.drawSystems.forEach(drawSystem => {
-      drawSystem(p5, drawSystem.entities);
+      drawSystem(drawSystem.entities, { p5: this.p5, globalEventBus: this.globalEventBus });
     });
+  }
+
+  mousePressed() {
+    this.globalEventBus.next({ type: 'Tap' });
   }
 }

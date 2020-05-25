@@ -1,4 +1,4 @@
-function renderSystem(p5, entities) {
+function renderSystem(entities, { p5 }) {
   entities.forEach((e) => {
     const renderComp = e.components.Renderer;
     const transform = e.components.Transform;
