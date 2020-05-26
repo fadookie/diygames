@@ -5,9 +5,12 @@ import ScriptSystem from './ScriptSystem';
 import InputSystem from './InputSystem';
 
 export default class EcsManager {
-  updateSystems = [
+  reactiveSystems = [
     new InputSystem(),
     new ScriptSystem(),
+  ]
+
+  updateSystems = [
     new DirectionalMovementSystem(),
   ]
 
@@ -16,7 +19,7 @@ export default class EcsManager {
   ]
 
   get systems() {
-    return _.uniq([...this.updateSystems, ...this.drawSystems]);
+    return _.uniq([...this.reactiveSystems, ...this.updateSystems, ...this.drawSystems]);
   }
 
   runtimeEntities = [];
@@ -82,6 +85,14 @@ export default class EcsManager {
       if (system.setup) {
         system.entities.forEach(e => {
           system.setup(e, this.context);
+        });
+      }
+
+      if (system.reactToData) {
+        system.entities.forEach(e => {
+          const observable = system.reactToData(e, this.context);
+          const subscription = observable.subscribe(x => system.execute(e, x))
+          e.subscriptions.push(subscription);
         });
       }
     });
