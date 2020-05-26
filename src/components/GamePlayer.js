@@ -26,7 +26,7 @@ function createSketch(sceneRef, sketchRef, node) {
       ecsManager.onDraw(sceneRef.current);
     };
     p.mousePressed = (event) => {
-      globalEventBus.next({ type: 'Tap', data: { mouseX: p.mouseX, mouseY: p.mouseY, event }});
+      globalEventBus.next({ type: 'Tap', data: { mousePos: { x: p.mouseX, y: p.mouseY } }});
     };
   };
   sketch.onSceneChanged = (scene) => {

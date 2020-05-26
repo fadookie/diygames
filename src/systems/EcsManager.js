@@ -3,11 +3,13 @@ import RenderSystem from './RenderSystem';
 import DirectionalMovementSystem from './DirectionalMovementSystem';
 import ScriptSystem from './ScriptSystem';
 import InputSystem from './InputSystem';
+import TapDetectionSystem from './TapDetectionSystem';
 
 export default class EcsManager {
   reactiveSystems = [
     new InputSystem(),
     new ScriptSystem(),
+    new TapDetectionSystem(),
   ]
 
   updateSystems = [
@@ -59,7 +61,8 @@ export default class EcsManager {
         onComponentsChanged(this);
       },
       dispose() {
-        this.subscriptions.forEach(s => s.unsubscribe());
+        this.subscriptions.forEach(s => s.subscription.unsubscribe());
+        this.subscriptions = [];
       }
     }));
     
@@ -74,7 +77,7 @@ export default class EcsManager {
         const diff = _.difference(
           system.targetGroup,
           entity.componentTypes
-        );
+        )
         const predicate = diff.length === 0;
         // console.log('@@@ diff:', diff, 'target:', system.targetGroup, 'components:', Object.keys(entity.components), 'predicate:', predicate);
         return predicate;
@@ -89,11 +92,21 @@ export default class EcsManager {
       }
 
       if (system.reactToData) {
+        console.log('Refresh subscriptions for ', system.constructor.name);
+        const systemSubscriptionPredicate = systemSubscription => systemSubscription.system === system;
         system.entities.forEach(e => {
+          e.subscriptions
+            .filter(systemSubscriptionPredicate)
+            .forEach(systemSubscription => {
+              systemSubscription.subscription.unsubscribe();
+            });
+          _.remove(e.subscriptions, systemSubscriptionPredicate);
           const observable = system.reactToData(e, this.context);
-          const subscription = observable.subscribe(x => system.execute(e, x))
-          e.subscriptions.push(subscription);
+          console.log('e:', e, 'observable:', observable);
+          const subscription = observable.subscribe(x => { system.execute(e, x); })
+          e.subscriptions.push({ system, subscription });
         });
+        console.log('reactToData setup done for', system.constructor.name, ', ents:', system.entities);
       }
     });
   }

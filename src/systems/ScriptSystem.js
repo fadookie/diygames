@@ -1,5 +1,5 @@
 // import { Subject } from 'rxjs';
-import { merge } from 'rxjs';
+import { merge, empty } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 /*
 Scripts: [
@@ -14,7 +14,7 @@ Scripts: [
 ],
 */
 export default class ScriptSystem {
-  targetGroup = ['Scripts'];
+  targetGroup = ['Collision', 'Scripts'];
   entities = [];
 
   setup(e, { globalEventBus }) {
@@ -29,12 +29,25 @@ export default class ScriptSystem {
       const triggerObservables = script.triggers.map((trigger) => {
         switch(trigger.type) {
           case 'TapTrigger': {
-            console.assert(trigger.target === 'Anywhere', 'Unrecognized tap target');
-            return globalEventBus
-              .pipe(
-                filter(evt => evt.type === 'Tap'),
-                map(evt => ({ ...evt, script, trigger })),
-              )
+            switch(trigger.target) {
+              case 'Anywhere': {
+                return globalEventBus
+                  .pipe(
+                    filter(evt => evt.type === 'Tap'),
+                    map(evt => ({ ...evt, script, trigger })),
+                  )
+              } case 'Self': {
+                if (!e.components.Collision.onTap) {
+                  console.warn('no onTap');
+                  return empty();
+                }
+                return e.components.Collision.onTap.pipe(
+                  map(evt => ({ ...evt, script, trigger })),
+                );
+              } default: {
+                throw new Error(`Unrecognized tap target: '${trigger.target}'`);
+              }
+            }
           } default: {
             throw new Error(`Unrecognized trigger type: ${trigger.type}`);
           }
