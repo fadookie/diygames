@@ -7,32 +7,31 @@ function CodeEditor() {
   const { gameState, gameDispatch } = context;
   const { entities } = gameState;
 
-  const onSetEntities = entities => gameDispatch({ type: 'setEntities', entities });
-
   const stringifiedEntities = useMemo(
     JSON.stringify.bind(null, entities, undefined, 2),
   [entities]);
 
+  const [error, setError] = useState(null);
   const [text, setText] = useState(stringifiedEntities);
   useEffect(() => {
     setText(stringifiedEntities);
   }, [stringifiedEntities]);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  useEffect(() => {
     try {
       const entities = JSON.parse(text);
-      if (onSetEntities) onSetEntities(entities);
+      gameDispatch({ type: 'setEntities', entities });
+      setError(null);
     } catch (e) {
-      alert(e);
+      setError(e.message);
     }
-  };
+  }, [text, gameDispatch]);
 
   return (
-    <form className="codeEditor" onSubmit={handleSubmit}>
-      <input type="submit" value="Save" />
+    <div className="codeEditor">
+      <p className="error">{error}</p>
       <textarea value={text} onChange={evt => setText(evt.target.value)} />
-    </form>
+    </div>
   );
 }
 
