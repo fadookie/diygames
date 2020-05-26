@@ -17,7 +17,7 @@ export default class ScriptSystem {
   entities = [];
 
   setup(entities, { globalEventBus }) {
-    console.log('@@@ScriptSystem.setup', new Error().stack);
+    // console.log('@@@ScriptSystem.setup', new Error().stack);
     entities.forEach((e) => {
       if (e.isSetupDoneForScriptSystem) return;
       e.isSetupDoneForScriptSystem = true;

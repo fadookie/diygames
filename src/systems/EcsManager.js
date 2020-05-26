@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { Subject } from 'rxjs';
 import RenderSystem from './RenderSystem';
 import DirectionalMovementSystem from './DirectionalMovementSystem';
 import ScriptSystem from './ScriptSystem';
@@ -21,14 +20,15 @@ export default class EcsManager {
   }
 
   runtimeEntities = [];
-  globalEventBus = new Subject();
+  globalEventBus = null;
 
   get context() {
     return { p5: this.p5, globalEventBus: this.globalEventBus };
   }
 
-  constructor(p5) {
+  constructor(p5, globalEventBus) {
     this.p5 = p5;
+    this.globalEventBus = globalEventBus;
   }
 
   onComponentsChanged(entity) {
@@ -94,10 +94,5 @@ export default class EcsManager {
     this.drawSystems.forEach(system => {
       system.execute && system.execute(system.entities, this.context); 
     });
-  }
-
-  mousePressed(event) {
-    // console.log('@@@Ecs.mousePressed');
-    this.globalEventBus.next({ type: 'Tap', event });
   }
 }

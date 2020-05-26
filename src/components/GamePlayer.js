@@ -1,15 +1,17 @@
 import React, { useEffect, useCallback, useRef, useContext } from 'react';
 import P5 from 'p5';
 import _ from 'lodash';
+import { Subject } from 'rxjs';
 import GameContext from '../state/GameContext';
 import EcsManager from '../systems/EcsManager';
 
 function createSketch(sceneRef, sketchRef, node) {
   if (!node) return;
   let ecsManager;
+  const globalEventBus = new Subject();
   const sketch = (p5instance) => {
     const p = p5instance;
-    ecsManager = new EcsManager(p);
+    ecsManager = new EcsManager(p, globalEventBus);
     ecsManager.onSceneChanged(sceneRef.current);
     p.setup = () => {
       p.createCanvas(500, 500);
@@ -23,7 +25,9 @@ function createSketch(sceneRef, sketchRef, node) {
 
       ecsManager.onDraw(sceneRef.current);
     };
-    p.mousePressed = ecsManager.mousePressed.bind(ecsManager);
+    p.mousePressed = (event) => {
+      globalEventBus.next({ type: 'Tap', data: { mouseX: p.mouseX, mouseY: p.mouseY, event }});
+    };
   };
   sketch.onSceneChanged = (scene) => {
     console.log('@@@ sketch#onSceneChanged', scene);
