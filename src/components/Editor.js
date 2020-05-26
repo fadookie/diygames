@@ -22,13 +22,13 @@ function Editor() {
             strokeColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
             fillColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
           },
-          Collision: {
+          Collider: {
             type: 'AABB',
           },
           Scripts: [
             {
               triggers: [
-                { type: 'TapTrigger', target:'Any' }
+                { type: 'TapTrigger', target:'Self' }
               ],
               actions: [
                 { type: 'DirectionalMovement', velocity: { x: 1, y: 0 }}

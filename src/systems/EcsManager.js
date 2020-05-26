@@ -4,8 +4,13 @@ import DirectionalMovementSystem from './DirectionalMovementSystem';
 import ScriptSystem from './ScriptSystem';
 import InputSystem from './InputSystem';
 import TapDetectionSystem from './TapDetectionSystem';
+import ColliderSetupSystem from './ColliderSetupSystem';
 
 export default class EcsManager {
+  setupOnlySystems = [
+    new ColliderSetupSystem(),
+  ]
+
   reactiveSystems = [
     new InputSystem(),
     new ScriptSystem(),
@@ -21,7 +26,7 @@ export default class EcsManager {
   ]
 
   get systems() {
-    return _.uniq([...this.reactiveSystems, ...this.updateSystems, ...this.drawSystems]);
+    return _.uniq([...this.setupOnlySystems,  ...this.reactiveSystems, ...this.updateSystems, ...this.drawSystems]);
   }
 
   runtimeEntities = [];
@@ -42,7 +47,8 @@ export default class EcsManager {
 
   onSceneChanged(scene) {
     // Re-create runtime entity instances
-    const onComponentsChanged = this.onComponentsChanged.bind(this);
+    // Easy to get caught in infinite recursion here so debounce any group re-creation until the next frame
+    const onComponentsChanged = _.debounce(this.onComponentsChanged.bind(this), 0);
     this.runtimeEntities.forEach(e => e.dispose());
     this.runtimeEntities = scene.entities.map(entity => ({
       id: entity.id,
@@ -71,6 +77,7 @@ export default class EcsManager {
 
   onTargetGroupsChanged() {
     // Update system's entity list based on components required by targetGroup filter
+    // console.log('onTargetGroupsChanged stack:', new Error().stack);
     this.systems.forEach(system => {
       // console.log('@@@onSceneChanged filter for ', system.name);
       system.entities = this.runtimeEntities.filter(entity => {
@@ -85,12 +92,14 @@ export default class EcsManager {
     });
 
     this.systems.forEach(system => {
+      // Invoke setup systems
       if (system.setup) {
         system.entities.forEach(e => {
           system.setup(e, this.context);
         });
       }
 
+      // Refresh subscriptions for reactToData systems
       if (system.reactToData) {
         console.log('Refresh subscriptions for ', system.constructor.name);
         const systemSubscriptionPredicate = systemSubscription => systemSubscription.system === system;
@@ -102,7 +111,7 @@ export default class EcsManager {
             });
           _.remove(e.subscriptions, systemSubscriptionPredicate);
           const observable = system.reactToData(e, this.context);
-          console.log('e:', e, 'observable:', observable);
+          // console.log('reactToData setup e:', e, 'observable:', observable);
           const subscription = observable.subscribe(x => { system.execute(e, x); })
           e.subscriptions.push({ system, subscription });
         });

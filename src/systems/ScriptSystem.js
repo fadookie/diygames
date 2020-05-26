@@ -14,7 +14,7 @@ Scripts: [
 ],
 */
 export default class ScriptSystem {
-  targetGroup = ['Collision', 'Scripts'];
+  targetGroup = ['ColliderRuntime', 'Scripts'];
   entities = [];
 
   setup(e, { globalEventBus }) {
@@ -37,11 +37,7 @@ export default class ScriptSystem {
                     map(evt => ({ ...evt, script, trigger })),
                   )
               } case 'Self': {
-                if (!e.components.Collision.onTap) {
-                  console.warn('no onTap');
-                  return empty();
-                }
-                return e.components.Collision.onTap.pipe(
+                return e.components.ColliderRuntime.onTap.pipe(
                   map(evt => ({ ...evt, script, trigger })),
                 );
               } default: {
