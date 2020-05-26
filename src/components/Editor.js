@@ -28,7 +28,7 @@ function Editor() {
           Scripts: [
             {
               triggers: [
-                { type: 'TapTrigger', target:'Self' }
+                { type: 'TapTrigger', target:'Any' }
               ],
               actions: [
                 { type: 'DirectionalMovement', velocity: { x: 1, y: 0 }}

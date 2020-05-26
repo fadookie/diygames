@@ -30,7 +30,7 @@ export default class ScriptSystem {
         switch(trigger.type) {
           case 'TapTrigger': {
             switch(trigger.target) {
-              case 'Anywhere': {
+              case 'Any': {
                 return globalEventBus
                   .pipe(
                     filter(evt => evt.type === 'Tap'),
