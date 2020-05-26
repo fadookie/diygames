@@ -79,20 +79,28 @@ export default class EcsManager {
     });
 
     this.systems.forEach(system => {
-      system.setup && system.setup(system.entities, this.context);
+      if (system.setup) {
+        system.entities.forEach(e => {
+          system.setup(e, this.context);
+        });
+      }
     });
   }
 
 
   onUpdate(scene) {
     this.updateSystems.forEach(system => {
-      system.execute && system.execute(system.entities, this.context);
+      system.entities.forEach(e => {
+        system.execute(e, this.context);
+      });
     });
   }
 
   onDraw(scene) {
     this.drawSystems.forEach(system => {
-      system.execute && system.execute(system.entities, this.context); 
+      system.entities.forEach(e => {
+        system.execute(e, this.context);
+      });
     });
   }
 }
