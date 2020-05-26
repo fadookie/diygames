@@ -1,8 +1,28 @@
-import React, { useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import _ from 'lodash';
 import GamePlayer from './GamePlayer.js';
 import GameContext from '../state/GameContext';
 import './Editor.css';
+
+function CodeEditor({ entities, onSetEntities }) {
+  const [text, setText] = useState(JSON.stringify(entities, undefined, 2));
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    try {
+      const entities = JSON.parse(text);
+      if (onSetEntities) onSetEntities(entities);
+    } catch (e) {
+      alert(e);
+    }
+  };
+
+  return (
+    <form className="codeEditor" onSubmit={handleSubmit}>
+      <textarea value={text} onChange={evt => setText(evt.target.value)} />
+      <input type="submit" value="Save" />
+    </form>
+  );
+}
 
 function Editor() {
   const context = useContext(GameContext);
@@ -42,6 +62,7 @@ function Editor() {
 
   const addTestEntity = () => addEntity(`testEntity_${Date.now()}`);
   const addDuplicateEntity = addEntity.bind(null, 'duplicateEntity');
+  const onSetEntities = entities => gameDispatch({ type: 'setEntities', entities });
 
   const removeTestEntity = () => {
     if (gameState.entities.length < 1) return;
@@ -79,8 +100,10 @@ function Editor() {
       </button>
       <GamePlayer />
       <br />
+      Entity Editor:
+      <CodeEditor entities={gameState.entities} onSetEntities={onSetEntities} />
       Scene:
-      <pre className="codePreview">{`GameState: ${JSON.stringify(gameState, undefined, 2)}`}</pre>
+      <pre className="codePreview">{`GameState: ${JSON.stringify({...gameState, entities: '<See Above>'}, undefined, 2)}`}</pre>
     </div>
   );
 }

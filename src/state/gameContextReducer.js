@@ -21,6 +21,11 @@ export default (state, action) => {
           throw new Error('ID collision detected');
         }
       });
+    } case 'setEntities': {
+      return produce(state, next => {
+        const newEntities = _.reject(next.entities, e => _.some(action.entities, { id: e.id })); 
+        next.entities = [...newEntities, ...action.entities];
+      });
     } case 'removeEntities': {
       return produce(state, next => {
         _.remove(next.entities, entity => action.entityIds.includes(entity.id)); 
