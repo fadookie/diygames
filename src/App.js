@@ -14,9 +14,9 @@ const App = () => {
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <button onClick={() => setActiveComponent('Editor')}>Editor</button>
-          <button onClick={() => setActiveComponent('Player')}>Player</button>
         </header>
+        <button onClick={() => setActiveComponent('Editor')}>Editor</button>
+        <button onClick={() => setActiveComponent('Player')}>Player</button>
         <hr/>
         <div className="body">
           {(() => {

@@ -60,10 +60,7 @@ function GamePlayer({ playing }) {
     }
   }, [playing]);
   return (
-    <div className="container p-b-md p-r-md p-l-md has-text-centered">
-      GamePlayer
-      <div id="container" ref={sketchContainerRef} />
-    </div>
+    <div id="container" ref={sketchContainerRef} />
   );
 }
 

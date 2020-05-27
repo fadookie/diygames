@@ -61,9 +61,22 @@ function Editor() {
   return (
     <div className="container">
       Controls:<br />
-      <button className="button" onClick={() => setGamePlaying(prev => !prev)}>
-        {gamePlaying ? '⏹' : '▶️'}
+      <br />
+      <button className="button" onClick={shiftBgColor.bind(null, 10)}>
+        BG Color +
       </button>
+      <button className="button" onClick={shiftBgColor.bind(null, -10)}>
+        BG Color-
+      </button>
+      <br />
+      <p>GamePlayer 
+        <button className="button" style={{ margin: '5pt' }} onClick={() => setGamePlaying(prev => !prev)}>
+          {gamePlaying ? '⏹' : '▶️'}
+        </button>
+      </p>
+      <GamePlayer playing={gamePlaying} />
+      <br />
+      Entity Editor:
       <br />
       <button className="button" onClick={addTestEntity}>
         Add Test Entity
@@ -78,15 +91,6 @@ function Editor() {
         Clear Entities
       </button>
       <br />
-      <button className="button" onClick={shiftBgColor.bind(null, 10)}>
-        BG Color +
-      </button>
-      <button className="button" onClick={shiftBgColor.bind(null, -10)}>
-        BG Color-
-      </button>
-      <GamePlayer playing={gamePlaying} />
-      <br />
-      Entity Editor:
       <CodeEditor />
       Scene:
       <pre className="codePreview">{`GameState: ${JSON.stringify({...gameState, entities: '<See Above>'}, undefined, 2)}`}</pre>
