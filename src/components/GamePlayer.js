@@ -12,6 +12,7 @@ function createSketch(sceneRef, sketchRef, node) {
   const sketch = (p5instance) => {
     const p = p5instance;
     ecsManager = new EcsManager(p, globalEventBus);
+    sketch.onPlayingChanged = ecsManager.onPlayingChanged.bind(ecsManager);
     ecsManager.onSceneChanged(sceneRef.current);
     p.setup = () => {
       p.createCanvas(500, 500);
@@ -38,7 +39,7 @@ function createSketch(sceneRef, sketchRef, node) {
   sketchRef.current = sketch;
 }
 
-function GamePlayer() {
+function GamePlayer({ playing }) {
   const context = useContext(GameContext);
   const { gameState, gameDispatch } = context;
 
@@ -52,6 +53,12 @@ function GamePlayer() {
       sketchRef.current.onSceneChanged(sceneRef.current);
     }
   }, [gameState]);
+
+  useEffect(() => {
+    if (sketchRef.current && sketchRef.current.onPlayingChanged) {
+      sketchRef.current.onPlayingChanged(playing);
+    }
+  }, [playing]);
   return (
     <div className="container p-b-md p-r-md p-l-md has-text-centered">
       GamePlayer

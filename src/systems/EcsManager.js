@@ -25,6 +25,8 @@ export default class EcsManager {
     new RenderSystem(),
   ]
 
+  playing = false
+
   get systems() {
     return _.uniq([...this.setupOnlySystems,  ...this.reactiveSystems, ...this.updateSystems, ...this.drawSystems]);
   }
@@ -45,7 +47,16 @@ export default class EcsManager {
     this.onTargetGroupsChanged();
   }
 
+  onPlayingChanged(playing) {
+    const prevPlaying = this.playing;
+    this.playing = playing;
+    if (prevPlaying !== playing) {
+      this.onSceneChanged(this.scene);
+    }
+  }
+
   onSceneChanged(scene) {
+    this.scene = scene;
     // Re-create runtime entity instances
     // Easy to get caught in infinite recursion here so debounce any group re-creation until the next frame
     const onComponentsChanged = _.debounce(this.onComponentsChanged.bind(this), 0);
@@ -100,7 +111,7 @@ export default class EcsManager {
       }
 
       // Refresh subscriptions for reactToData systems
-      if (system.reactToData) {
+      if (this.playing && system.reactToData) {
         console.log('Refresh subscriptions for ', system.constructor.name);
         const systemSubscriptionPredicate = systemSubscription => systemSubscription.system === system;
         system.entities.forEach(e => {
@@ -122,6 +133,7 @@ export default class EcsManager {
 
 
   onUpdate(scene) {
+    if (!this.playing) return;
     this.updateSystems.forEach(system => {
       system.entities.forEach(e => {
         system.execute(e, this.context);

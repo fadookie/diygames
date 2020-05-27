@@ -24,7 +24,7 @@ const App = () => {
               case 'Editor':
                 return <Editor />;
               case 'Player':
-                return <GamePlayer />;
+                return <GamePlayer playing={true} />;
               default:
                 return `Unknown component ${activeComponent}`;
             }

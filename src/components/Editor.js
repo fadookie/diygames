@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import _ from 'lodash';
 import GamePlayer from './GamePlayer.js';
 import GameContext from '../state/GameContext';
@@ -8,6 +8,8 @@ import './Editor.css';
 function Editor() {
   const context = useContext(GameContext);
   const { gameState, gameDispatch } = context;
+
+  const [gamePlaying, setGamePlaying] = useState(false);
 
   const addEntity = (id) => {
     gameDispatch({
@@ -59,6 +61,10 @@ function Editor() {
   return (
     <div className="container">
       Controls:<br />
+      <button className="button" onClick={() => setGamePlaying(prev => !prev)}>
+        {gamePlaying ? '⏹' : '▶️'}
+      </button>
+      <br />
       <button className="button" onClick={addTestEntity}>
         Add Test Entity
       </button>
@@ -78,7 +84,7 @@ function Editor() {
       <button className="button" onClick={shiftBgColor.bind(null, -10)}>
         BG Color-
       </button>
-      <GamePlayer />
+      <GamePlayer playing={gamePlaying} />
       <br />
       Entity Editor:
       <CodeEditor />
