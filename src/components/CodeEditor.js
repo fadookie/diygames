@@ -1,4 +1,8 @@
 import React, { useState, useEffect, useMemo, useContext } from 'react';
+import Editor from 'react-simple-code-editor';
+import { highlight, languages } from 'prismjs/components/prism-core';
+import 'prismjs/components/prism-json';
+import 'prismjs/themes/prism-okaidia.css';
 import GameContext from '../state/GameContext';
 import './CodeEditor.css';
 
@@ -13,9 +17,8 @@ function CodeEditor() {
 
   const [error, setError] = useState(null);
   const [text, setText] = useState(stringifiedEntities);
-  useEffect(() => {
-    setText(stringifiedEntities);
-  }, [stringifiedEntities]);
+  const revertText = setText.bind(null, stringifiedEntities);
+  useEffect(revertText, [stringifiedEntities]);
 
   useEffect(() => {
     try {
@@ -28,9 +31,15 @@ function CodeEditor() {
   }, [text, gameDispatch]);
 
   return (
-    <div className="codeEditor">
-      <p className="error">{error}</p>
-      <textarea value={text} onChange={evt => setText(evt.target.value)} />
+    <div className="codeEditorContainer">
+      {error && <p className="error">{error} <button onClick={revertText}>Revert To Saved</button></p>}
+      <Editor
+        className="codeEditor"
+        value={text}
+        onValueChange={setText}
+        highlight={code => highlight(code, languages.json)}
+        padding={10}
+      />
     </div>
   );
 }
