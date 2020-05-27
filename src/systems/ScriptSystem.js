@@ -1,6 +1,6 @@
 // import { Subject } from 'rxjs';
-import { merge, empty } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
+import { filter, distinctUntilChanged } from 'rxjs/operators';
 /*
 Scripts: [
   {
@@ -14,7 +14,7 @@ Scripts: [
 ],
 */
 export default class ScriptSystem {
-  targetGroup = ['ColliderRuntime', 'Scripts'];
+  targetGroup = ['ColliderRuntime', 'Script0'];
   entities = [];
 
   setup(e, { globalEventBus }) {
@@ -24,39 +24,37 @@ export default class ScriptSystem {
   }
 
   reactToData(e, { globalEventBus }) {
-    const scripts = e.components.Scripts;
-    const observables = scripts.map(script => {
-      const triggerObservables = script.triggers.map((trigger) => {
-        switch(trigger.type) {
-          case 'TapTrigger': {
-            switch(trigger.target) {
-              case 'Any': {
-                return globalEventBus
-                  .pipe(
-                    filter(evt => evt.type === 'Tap'),
-                    map(evt => ({ ...evt, script, trigger })),
-                  )
-              } case 'Self': {
-                return e.components.ColliderRuntime.onTap.pipe(
-                  map(evt => ({ ...evt, script, trigger })),
-                );
-              } default: {
-                throw new Error(`Unrecognized tap target: '${trigger.target}'`);
-              }
+    const script = e.components.Script0;
+    const triggerObservables = script.triggers.map((trigger) => {
+      switch(trigger.type) {
+        case 'TapTrigger': {
+          switch(trigger.target) {
+            case 'Any': {
+              return globalEventBus
+                .pipe(
+                  filter(evt => evt.type === 'Tap'),
+                )
+            } case 'Self': {
+              return e.components.ColliderRuntime.onTap;
+            } default: {
+              throw new Error(`Unrecognized tap target: '${trigger.target}'`);
             }
-          } default: {
-            throw new Error(`Unrecognized trigger type: ${trigger.type}`);
           }
+        } default: {
+          throw new Error(`Unrecognized trigger type: ${trigger.type}`);
         }
-      })
-      return merge(...triggerObservables);
-    });
-    return merge(...observables);
+      }
+    })
+    // Emit previous and current values for all triggers
+    return combineLatest(...triggerObservables)
+            .pipe(
+              distinctUntilChanged(),
+            );
   }
 
   execute(e, data) {
     console.log('@@@ScriptSystem#exectute e:', e, 'data:', data);
-    data.script.actions.forEach(action => {
+    e.components.Script0.actions.forEach(action => {
       e.addComponent(action.type, action);
     });
   }

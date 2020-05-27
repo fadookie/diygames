@@ -28,16 +28,14 @@ function Editor() {
           Collider: {
             type: 'AABB',
           },
-          Scripts: [
-            {
-              triggers: [
-                { type: 'TapTrigger', target:'Self' }
-              ],
-              actions: [
-                { type: 'DirectionalMovement', velocity: { x: 1, y: 0 }}
-              ],
-            },
-          ],
+          Script0: {
+            triggers: [
+              { type: 'TapTrigger', target:'Self' }
+            ],
+            actions: [
+              { type: 'DirectionalMovement', velocity: { x: 1, y: 0 }}
+            ],
+          },
         },
       }],
     });
