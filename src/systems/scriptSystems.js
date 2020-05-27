@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { combineLatest } from 'rxjs';
-import { filter, distinctUntilChanged } from 'rxjs/operators';
+import { filter, map, tap } from 'rxjs/operators';
+import { reject, every, flow, isNull, identity } from 'lodash/fp';
 /*
 Script0: {
   triggers: [
@@ -36,7 +37,9 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
                   filter(evt => evt.type === 'Tap'),
                 )
             } case 'Self': {
-              return e.components.ColliderRuntime.onTap;
+              return e.components.ColliderRuntime.onTap.pipe(
+                map(() => null)
+              );
             } default: {
               throw new Error(`Unrecognized tap target: '${trigger.target}'`);
             }
@@ -45,7 +48,7 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
           switch(trigger.target) {
             case 'Self': {
               return e.switchObservable.pipe(
-                filter(value => value === trigger.condition)
+                map(value => value === trigger.condition)
               );
             } default: {
               throw new Error(`Unrecognized switch target: '${trigger.target}'`);
@@ -56,10 +59,15 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
         }
       }
     })
-    // Emit previous and current values for all triggers
+    // Emit only when all boolean triggers are true
     return combineLatest(...triggerObservables)
             .pipe(
-              distinctUntilChanged(),
+              filter(
+                  flow(
+                    reject(isNull),
+                    every(identity),
+                  )
+              ),
             );
   }
 

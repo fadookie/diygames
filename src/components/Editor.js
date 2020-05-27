@@ -9,7 +9,7 @@ function Editor() {
   const context = useContext(GameContext);
   const { gameState, gameDispatch } = context;
 
-  const [gamePlaying, setGamePlaying] = useState(false);
+  const [gamePlaying, setGamePlaying] = useState(true);
 
   const addEntity = (id) => {
     gameDispatch({
