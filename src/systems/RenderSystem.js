@@ -12,7 +12,9 @@ export default class RenderSystem {
     } else {
       p5.noStroke();
     }
-    if (renderComp.fillColor) {
+    if(e.switch) { 
+      p5.fill(255, 0, 0);
+    } else if (renderComp.fillColor) {
       p5.fill(...renderComp.fillColor);
     } else {
       p5.noFill();

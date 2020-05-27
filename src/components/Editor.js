@@ -19,7 +19,7 @@ function Editor() {
         components: {
           Transform: {
             pos: { x: _.random(0, 200), y: _.random(0, 200) },
-            size: { w: 10, h: 10 },
+            size: { w: 50, h: 50 },
           },
           Renderer: {
             strokeColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
@@ -30,10 +30,22 @@ function Editor() {
           },
           Script0: {
             triggers: [
-              { type: 'TapTrigger', target:'Self' }
+              { type: 'TapTrigger', target:'Self' },
+              { type: 'Switch', target:'Self', condition:false }
             ],
             actions: [
-              { type: 'DirectionalMovement', velocity: { x: 1, y: 0 }}
+              { type: 'SetComponent', component: 'DirectionalMovement', velocity: { x: 1, y: 0 } },
+              { type: 'Switch', set:true },
+            ],
+          },
+          Script1: {
+            triggers: [
+              { type: 'TapTrigger', target:'Self' },
+              { type: 'Switch', target:'Self', condition:true }
+            ],
+            actions: [
+              { type: 'SetComponent', component: 'DirectionalMovement', velocity: { x: -1, y: 0 } },
+              { type: 'Switch', set:false },
             ],
           },
         },

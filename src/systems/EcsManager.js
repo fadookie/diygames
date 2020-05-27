@@ -1,7 +1,8 @@
 import _ from 'lodash';
+import Entity from './Entity';
 import RenderSystem from './RenderSystem';
 import DirectionalMovementSystem from './DirectionalMovementSystem';
-import ScriptSystem from './ScriptSystem';
+import scriptSystems from './scriptSystems';
 import InputSystem from './InputSystem';
 import TapDetectionSystem from './TapDetectionSystem';
 import ColliderSetupSystem from './ColliderSetupSystem';
@@ -13,8 +14,8 @@ export default class EcsManager {
 
   reactiveSystems = [
     new InputSystem(),
-    new ScriptSystem(),
     new TapDetectionSystem(),
+    ...scriptSystems,
   ]
 
   updateSystems = [
@@ -61,27 +62,7 @@ export default class EcsManager {
     // Easy to get caught in infinite recursion here so debounce any group re-creation until the next frame
     const onComponentsChanged = _.debounce(this.onComponentsChanged.bind(this), 0);
     this.runtimeEntities.forEach(e => e.dispose());
-    this.runtimeEntities = scene.entities.map(entity => ({
-      id: entity.id,
-      components: _.cloneDeep(entity.components),
-      sceneEntity: entity,
-      subscriptions: [],
-      get componentTypes() {
-        return Object.keys(this.components);
-      },
-      addComponent(componentName, component) {
-        this.components[componentName] = component;
-        onComponentsChanged(this);
-      },
-      removeComponent(componentName) {
-        delete this.components[componentName];
-        onComponentsChanged(this);
-      },
-      dispose() {
-        this.subscriptions.forEach(s => s.subscription.unsubscribe());
-        this.subscriptions = [];
-      }
-    }));
+    this.runtimeEntities = scene.entities.map(e => new Entity(onComponentsChanged, e));
     
     this.onTargetGroupsChanged();
   }
