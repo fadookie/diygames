@@ -18,7 +18,9 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "deploy": "./deploy.sh",
+    "sync": "./scripts/sync.sh",
+    "deploy": "./scripts/deploy.sh",
+    "build-and-sync": "yarn build && yarn run sync",
     "build-and-deploy": "yarn build && yarn run deploy",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

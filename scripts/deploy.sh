@@ -5,14 +5,13 @@ set -o pipefail
 
 hash jq 2>/dev/null || { echo 'Error: jq utility is required, please install it.' >&2 ; exit 1; }
 
-AWS_PROFILE='eliot'
-S3_BUCKET='eliotwarediy'
-DISTRIBUTION_ID='E11IUTYOF52MIC'
-SLEEP_DELAY=30
+SCRIPTPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+source "$SCRIPTPATH/settings.sh"
 
 set -x
 
-aws --profile "$AWS_PROFILE" s3 sync --delete --acl public-read build "s3://$S3_BUCKET"
+bash "$SCRIPTPATH/sync.sh"
 
 CREATE_INVALIDATION_RESPONSE=$(aws --profile "$AWS_PROFILE" cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths '/*')
 

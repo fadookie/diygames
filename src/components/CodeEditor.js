@@ -37,7 +37,7 @@ function CodeEditor() {
         className="codeEditor"
         value={text}
         onValueChange={setText}
-        highlight={code => highlight(code, languages.json)}
+        highlight={code => highlight(code, languages.json, 'json')}
         padding={10}
       />
     </div>
