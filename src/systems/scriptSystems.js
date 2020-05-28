@@ -25,6 +25,14 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
     // e.isSetupDoneForScriptSystem = true;
   }
 
+  assert(condition, message, e) {
+    if (!condition) throw this.getError(message, e);
+  }
+
+  getError(message, e) {
+    return new Error(`${message} (in entity ${e.id} ${scriptNumber})`);
+  }
+
   parseTriggers(e, { globalEventBus }) {
     const triggers = e.components[scriptNumber].triggers;
     return triggers.map((trigger) => {
@@ -41,11 +49,11 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
                     map(() => null)
                   );
                 } default: {
-                  throw new Error(`Unrecognized tap target: '${trigger.target}'`);
+                  throw this.getError(`Unrecognized tap target: '${trigger.target}'`, e);
                 }
               }
             } default: {
-              throw new Error(`Unrecognized trigger type: ${trigger.type}`);
+              throw this.getError(`Unrecognized trigger type: ${trigger.type}`, e);
             }
           }
         });
@@ -64,14 +72,14 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
               );
             } default: {
               const other = entities.find(other => other.id === condition.target);
-              if (!other) throw new Error(`Unrecognized switch condition: '${condition.target}'`);
+              this.assert(other, `Unrecognized switch target: '${condition.target}'`, e);
               return other.switchObservable.pipe(
                 conditionMet,
               );
             }
           }
         } default: {
-          throw new Error(`Unrecognized condition type: ${condition.type}`);
+          throw this.getError(`Unrecognized condition type: ${condition.type}`, e);
         }
       }
     });
@@ -105,7 +113,7 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
           e.switch = action.set;
           return;
         } default: {
-          throw new Error(`Unrecognized action type: ${action.type}`);
+          throw this.getError(`Unrecognized action type: ${action.type}`, e);
         }
       }
     });
