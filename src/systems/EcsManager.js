@@ -36,7 +36,7 @@ export default class EcsManager {
   globalEventBus = null;
 
   get context() {
-    return { p5: this.p5, globalEventBus: this.globalEventBus };
+    return { p5: this.p5, globalEventBus: this.globalEventBus, entities: this.runtimeEntities };
   }
 
   constructor(p5, globalEventBus) {

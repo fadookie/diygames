@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { combineLatest } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
+import { filter, map, withLatestFrom } from 'rxjs/operators';
 import { reject, every, flow, isNull, identity } from 'lodash/fp';
 /*
 Script0: {
@@ -25,43 +25,65 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
     // e.isSetupDoneForScriptSystem = true;
   }
 
-  reactToData(e, { globalEventBus }) {
-    const script = e.components[scriptNumber];
-    const triggerObservables = script.triggers.map((trigger) => {
-      switch(trigger.type) {
-        case 'TapTrigger': {
-          switch(trigger.target) {
-            case 'Any': {
-              return globalEventBus
-                .pipe(
-                  filter(evt => evt.type === 'Tap'),
-                )
-            } case 'Self': {
-              return e.components.ColliderRuntime.onTap.pipe(
-                map(() => null)
-              );
+  parseTriggers(e, { globalEventBus }) {
+    const triggers = e.components[scriptNumber].triggers;
+    return triggers.map((trigger) => {
+          switch(trigger.type) {
+            case 'TapTrigger': {
+              switch(trigger.target) {
+                case 'Any': {
+                  return globalEventBus
+                    .pipe(
+                      filter(evt => evt.type === 'Tap'),
+                    )
+                } case 'Self': {
+                  return e.components.ColliderRuntime.onTap.pipe(
+                    map(() => null)
+                  );
+                } default: {
+                  throw new Error(`Unrecognized tap target: '${trigger.target}'`);
+                }
+              }
             } default: {
-              throw new Error(`Unrecognized tap target: '${trigger.target}'`);
+              throw new Error(`Unrecognized trigger type: ${trigger.type}`);
             }
           }
-        } case 'Switch': {
-          switch(trigger.target) {
+        });
+  }
+
+  parseConditions(e, { entities }) {
+    const conditions = e.components[scriptNumber].conditions;
+    return conditions.map((condition) => {
+      const conditionMet = map(value => value === condition.condition);
+      switch(condition.type) {
+        case 'Switch': {
+          switch(condition.target) {
             case 'Self': {
               return e.switchObservable.pipe(
-                map(value => value === trigger.condition)
+                conditionMet,
               );
             } default: {
-              throw new Error(`Unrecognized switch target: '${trigger.target}'`);
+              const other = entities.find(other => other.id === condition.target);
+              if (!other) throw new Error(`Unrecognized switch condition: '${condition.target}'`);
+              return other.switchObservable.pipe(
+                conditionMet,
+              );
             }
           }
         } default: {
-          throw new Error(`Unrecognized trigger type: ${trigger.type}`);
+          throw new Error(`Unrecognized condition type: ${condition.type}`);
         }
       }
-    })
+    });
+  }
+
+  reactToData(e, context) {
+    const triggerObservables = this.parseTriggers(e, context);
+    const conditionObservables = this.parseConditions(e, context);
     // Emit only when all boolean triggers are true
     return combineLatest(...triggerObservables)
             .pipe(
+              withLatestFrom(...conditionObservables),
               filter(
                   flow(
                     reject(isNull),

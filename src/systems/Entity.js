@@ -18,6 +18,7 @@ export default class Entity {
   }
 
   get switchObservable() {
+    // Need to defer this event so we don't get stuck in infinite recursion
     return this._switch.asObservable().pipe(delay(0));
   }
 
