@@ -4,7 +4,6 @@ import RenderSystem from './RenderSystem';
 import DirectionalMovementSystem from './DirectionalMovementSystem';
 import scriptSystems from './scriptSystems';
 import InputSystem from './InputSystem';
-import TapDetectionSystem from './TapDetectionSystem';
 import ColliderSetupSystem from './ColliderSetupSystem';
 
 export default class EcsManager {
@@ -14,7 +13,6 @@ export default class EcsManager {
 
   reactiveSystems = [
     new InputSystem(),
-    new TapDetectionSystem(),
     ...scriptSystems,
   ]
 
