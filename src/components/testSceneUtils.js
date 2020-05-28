@@ -96,10 +96,7 @@ export const generateTestSceneEntities = () => ([
       },
       Script0: {
         triggers: [
-          { type: 'TapTrigger', target:'Self' },
-        ],
-        conditions: [
-          { type: 'Switch', target:'Self', condition:false },
+          { type: 'Switch', target:'e0', changingTo:true },
         ],
         actions: [
           { type: 'Switch', set:true },
@@ -107,10 +104,7 @@ export const generateTestSceneEntities = () => ([
       },
       Script1: {
         triggers: [
-          { type: 'TapTrigger', target:'Self' },
-        ],
-        conditions: [
-          { type: 'Switch', target:'Self', condition: true },
+          { type: 'Switch', target:'e0', changingTo:false },
         ],
         actions: [
           { type: 'Switch', set:false },

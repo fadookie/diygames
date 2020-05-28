@@ -8,6 +8,7 @@ export const initialState = {
 Object.freeze(initialState);
 
 export default (state, action) => {
+  if (action.entities && action.entities.find(e => e.id === 'Self')) throw new Error('Entity ID Self is reserved.');
   switch (action.type) {
     case 'addEntities': {
       return produce(state, next => {

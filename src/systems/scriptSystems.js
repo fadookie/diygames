@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import { combineLatest } from 'rxjs';
+import { merge } from 'rxjs';
 import { filter, map, withLatestFrom } from 'rxjs/operators';
-import { reject, every, flow, isNull, identity } from 'lodash/fp';
+import { every, flow, identity } from 'lodash/fp';
 /*
 Script0: {
   triggers: [
@@ -33,7 +33,15 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
     return new Error(`${message} (in entity ${e.id} ${scriptNumber})`);
   }
 
-  parseTriggers(e, { globalEventBus }) {
+  findTarget(e, target, { entities}) {
+    if (target === 'Self') return e;
+    const other = entities.find(other => other.id === target);
+    this.assert(other, `Unrecognized switch target: '${target}'`, e);
+    return other;
+  }
+
+  parseTriggers(e, context) {
+    const { globalEventBus } = context;
     const triggers = e.components[scriptNumber].triggers;
     return triggers.map((trigger) => {
           switch(trigger.type) {
@@ -45,13 +53,15 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
                       filter(evt => evt.type === 'Tap'),
                     )
                 } case 'Self': {
-                  return e.components.ColliderRuntime.onTap.pipe(
-                    map(() => null)
-                  );
+                  return e.components.ColliderRuntime.onTap;
                 } default: {
                   throw this.getError(`Unrecognized tap target: '${trigger.target}'`, e);
                 }
               }
+            } case 'Switch': {
+              return this.findTarget(e, trigger.target, context).switchObservable.pipe(
+                filter(value => value === trigger.changingTo),
+              );
             } default: {
               throw this.getError(`Unrecognized trigger type: ${trigger.type}`, e);
             }
@@ -59,25 +69,14 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
         });
   }
 
-  parseConditions(e, { entities }) {
-    const conditions = e.components[scriptNumber].conditions;
+  parseConditions(e, context) {
+    const conditions = e.components[scriptNumber].conditions || [];
     return conditions.map((condition) => {
-      const conditionMet = map(value => value === condition.condition);
       switch(condition.type) {
         case 'Switch': {
-          switch(condition.target) {
-            case 'Self': {
-              return e.switchObservable.pipe(
-                conditionMet,
-              );
-            } default: {
-              const other = entities.find(other => other.id === condition.target);
-              this.assert(other, `Unrecognized switch target: '${condition.target}'`, e);
-              return other.switchObservable.pipe(
-                conditionMet,
-              );
-            }
-          }
+          return this.findTarget(e, condition.target, context).switchObservable.pipe(
+            map(value => value === condition.condition),
+          );
         } default: {
           throw this.getError(`Unrecognized condition type: ${condition.type}`, e);
         }
@@ -88,23 +87,23 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
   reactToData(e, context) {
     const triggerObservables = this.parseTriggers(e, context);
     const conditionObservables = this.parseConditions(e, context);
-    // Emit only when all boolean triggers are true
-    return combineLatest(...triggerObservables)
+    // Emit only when a trigger fires and all boolean conditions are true
+    return merge(...triggerObservables)
             .pipe(
-              withLatestFrom(...conditionObservables),
+              withLatestFrom(...conditionObservables, (trigger, ...conditions) => ({ trigger, conditions })),
               filter(
                   flow(
-                    reject(isNull),
+                    evt => evt.conditions,
                     every(identity),
-                  )
+                  ),
               ),
             );
   }
 
   execute(e, data) {
-    console.log('@@@ScriptSystem#exectute e:', e, 'data:', data);
+    console.log(`@@@${scriptNumber}System#exectute e:`, e, 'data:', data);
     e.components[scriptNumber].actions.forEach(action => {
-      console.log('@@@ScriptSystem#exectute process action:', action);
+      console.log(`@@@${scriptNumber}#exectute process action:`, action);
       switch(action.type) {
         case 'SetComponent': {
           e.addComponent(action.component, action);
