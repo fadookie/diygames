@@ -1,8 +1,23 @@
 import _ from 'lodash';
-import { BehaviorSubject, asyncScheduler } from 'rxjs';
+import { BehaviorSubject, asyncScheduler,  } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { delay, subscribeOn, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
-function makeComponent(componentName, componentData) {
+type Component = {
+  tags?: string[],
+  dispose?: () => void,
+}
+
+type Components = {
+  [index: string]: Component,
+}
+
+type SubscriptionToken = {
+  system: Object,
+  subscription: Subscription,
+}
+
+function makeComponent(componentName : string, componentData : Component) : Component {
   switch(componentName) {
     case 'DirectionalMovement': {
       return { tags: ['movement'], ...componentData };
@@ -15,11 +30,13 @@ function makeComponent(componentName, componentData) {
 }
 
 export default class Entity {
-  subscriptions = []
+  id: string;
+  sceneEntity: Object;
+  subscriptions : SubscriptionToken[] = []
   _switch = new BehaviorSubject(false);
-  _components = new BehaviorSubject([]);
+  _components = new BehaviorSubject<Components>({});
 
-  constructor(entity) {
+  constructor(entity : { id: string, components: Components }) {
     this.id = entity.id;
     this.sceneEntity = entity;
     this._components.next(_.cloneDeep(entity.components));
@@ -59,15 +76,15 @@ export default class Entity {
     this._switch.next(value);
   }
 
-  addComponent(componentName, componentData) {
+  addComponent(componentName : string, componentData : Component) {
     // Only one component per type is allowed - dispose the old one first.
     this.disposeComponent(componentName);
     const newComponent = makeComponent(componentName, componentData);
     _.chain(this.components)
       // .pickBy(other => _.intersection(other.tags, newComponent.tags).length > 0)
       // .tap(x => console.log('XXX Chain START:', x))
-      .pickBy(other => {
-        const intersection = _.intersection(other.tags, newComponent.tags);
+      .pickBy((other : Component) => {
+        const intersection = _.intersection(other.tags || [], newComponent.tags || []);
         // console.log('other:', other, 'compData:', newComponent.tags, 'intersection: ', intersection);
         return intersection.length > 0;
       })
@@ -81,15 +98,15 @@ export default class Entity {
     console.log('XXX makeComponent', newComponent);
   }
 
-  removeComponent(componentName) {
+  removeComponent(componentName : string) {
     this.disposeComponent(componentName);
     this._components.next(_.omit(this.components, [componentName]));
   }
 
-  disposeComponent(componentName) {
+  disposeComponent(componentName : string) {
     const oldComponent = this.components[componentName];
     if (oldComponent && oldComponent.dispose) {
-      oldComponent.dispose(null);
+      oldComponent.dispose();
     }
     delete this.components[componentName];
   }
