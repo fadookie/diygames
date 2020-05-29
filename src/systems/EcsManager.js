@@ -91,7 +91,7 @@ export default class EcsManager {
 
       // Refresh subscriptions for reactToData systems
       if (this.playing && system.reactToData) {
-        console.log('Refresh subscriptions for ', system.constructor.name);
+        console.log('Refresh subscriptions for ', system.constructor.name, system.tag);
         const systemSubscriptionPredicate = systemSubscription => systemSubscription.system === system;
         system.entities.forEach(e => {
           e.subscriptions

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { delay, distinctUntilChanged } from 'rxjs/operators';
 
 export default class Entity {
   subscriptions = []
@@ -19,7 +19,10 @@ export default class Entity {
 
   get switchObservable() {
     // Need to defer this event so we don't get stuck in infinite recursion
-    return this._switch.asObservable().pipe(delay(0));
+    return this._switch.asObservable().pipe(
+      distinctUntilChanged(),
+      delay(0),
+    );
   }
 
   get switch() {
@@ -31,6 +34,7 @@ export default class Entity {
   }
 
   addComponent(componentName, component) {
+    this.disposeComponent(componentName);
     this.components[componentName] = component;
     this.onComponentsChanged(this);
   }
@@ -40,7 +44,16 @@ export default class Entity {
     this.onComponentsChanged(this);
   }
 
+  disposeComponent(componentName) {
+    const oldComponent = this.components[componentName];
+    if (oldComponent && oldComponent.dispose) {
+      oldComponent.dispose(null);
+    }
+  }
+
   dispose() {
+    Object.keys(this.components).forEach(this.disposeComponent.bind(this));
+    this._switch.complete();
     this.subscriptions.forEach(s => s.subscription.unsubscribe());
     this.subscriptions = [];
   }

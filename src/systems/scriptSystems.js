@@ -16,6 +16,7 @@ Script0: {
 */
 
 const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
+  tag = `${scriptNumber}System`;
   targetGroup = ['ColliderRuntime', scriptNumber];
   entities = [];
 
@@ -43,7 +44,7 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
   parseTriggers(e, context) {
     const { globalEventBus } = context;
     const triggers = e.components[scriptNumber].triggers;
-    return triggers.map((trigger) => {
+    return triggers.map((trigger, triggerIndex) => {
           switch(trigger.type) {
             case 'TapTrigger': {
               switch(trigger.target) {
@@ -61,6 +62,7 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
             } case 'Switch': {
               return this.findTarget(e, trigger.target, context).switchObservable.pipe(
                 filter(value => value === trigger.changingTo),
+                map(evt => ({ evt, triggerIndex, traceId: _.uniqueId() })),
               );
             } default: {
               throw this.getError(`Unrecognized trigger type: ${trigger.type}`, e);
