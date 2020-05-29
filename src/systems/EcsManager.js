@@ -1,9 +1,10 @@
 import _ from 'lodash';
+import { Subject, asyncScheduler } from 'rxjs';
+import { subscribeOn } from 'rxjs/operators';
 import Entity from './Entity';
 import RenderSystem from './RenderSystem';
 import DirectionalMovementSystem from './DirectionalMovementSystem';
 import scriptSystems from './scriptSystems';
-import InputSystem from './InputSystem';
 import ColliderSetupSystem from './ColliderSetupSystem';
 
 export default class EcsManager {
@@ -12,7 +13,6 @@ export default class EcsManager {
   ]
 
   reactiveSystems = [
-    new InputSystem(),
     ...scriptSystems,
   ]
 
@@ -32,6 +32,7 @@ export default class EcsManager {
 
   runtimeEntities = [];
   globalEventBus = null;
+  updateSubject = new Subject();
 
   get context() {
     return { p5: this.p5, globalEventBus: this.globalEventBus, entities: this.runtimeEntities };
@@ -40,6 +41,9 @@ export default class EcsManager {
   constructor(p5, globalEventBus) {
     this.p5 = p5;
     this.globalEventBus = globalEventBus;
+    this.updateSubject.pipe(
+      subscribeOn(asyncScheduler),
+    ).subscribe(this.onUpdateTick.bind(this));
   }
 
   onComponentsChanged(entity) {
@@ -58,9 +62,9 @@ export default class EcsManager {
     this.scene = scene;
     // Re-create runtime entity instances
     // Easy to get caught in infinite recursion here so debounce any group re-creation until the next frame
-    const onComponentsChanged = _.debounce(this.onComponentsChanged.bind(this), 0);
     this.runtimeEntities.forEach(e => e.dispose());
-    this.runtimeEntities = scene.entities.map(e => new Entity(onComponentsChanged, e));
+    this.runtimeEntities = scene.entities.map(e => new Entity(e));
+    this.runtimeEntities.forEach(e => e.componentsObservable.subscribe(this.onComponentsChanged.bind(this)));
     
     this.onTargetGroupsChanged();
   }
@@ -113,6 +117,10 @@ export default class EcsManager {
 
   onUpdate(scene) {
     if (!this.playing) return;
+    this.updateSubject.next(scene);
+  }
+
+  onUpdateTick(scene) {
     this.updateSystems.forEach(system => {
       system.entities.forEach(e => {
         system.execute(e, this.context);

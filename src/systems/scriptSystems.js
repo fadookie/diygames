@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { merge } from 'rxjs';
-import { filter, map, withLatestFrom } from 'rxjs/operators';
+import { filter, map, skip, withLatestFrom } from 'rxjs/operators';
 import { every, flow, identity } from 'lodash/fp';
 /*
 Script0: {
@@ -61,6 +61,7 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
               }
             } case 'Switch': {
               return this.findTarget(e, trigger.target, context).switchObservable.pipe(
+                skip(1), // BehaviorSubject emits current value on subscribe, but we don't want this in case we're re-subscribing
                 filter(value => value === trigger.changingTo),
                 map(evt => ({ evt, triggerIndex, traceId: _.uniqueId() })),
               );

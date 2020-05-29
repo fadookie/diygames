@@ -123,7 +123,8 @@ export const generateTestSceneEntities = () => ([
           { type: 'Switch', target:'Self', changingTo:false },
         ],
         actions: [
-          { type: 'SetComponent', component: 'DirectionalMovement', velocity: { x: 0, y: -1 } },
+          { type: 'SetComponent', component: 'StopMovement', },
+          // { type: 'SetComponent', component: 'DirectionalMovement', velocity: { x: 0, y: -1 } },
         ],
       },
     }

@@ -1,16 +1,41 @@
 import _ from 'lodash';
-import { BehaviorSubject } from 'rxjs';
-import { delay, distinctUntilChanged } from 'rxjs/operators';
+import { BehaviorSubject, asyncScheduler } from 'rxjs';
+import { delay, subscribeOn, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+
+function makeComponent(componentName, componentData) {
+  switch(componentName) {
+    case 'DirectionalMovement': {
+      return { tags: ['movement'], ...componentData };
+    } case 'StopMovement': {
+      return { tags: ['movement'], ...componentData };
+    } default: {
+      return componentData;
+    }
+  }
+}
 
 export default class Entity {
   subscriptions = []
   _switch = new BehaviorSubject(false);
+  _components = new BehaviorSubject([]);
 
-  constructor(onComponentsChanged, entity) {
+  constructor(entity) {
     this.id = entity.id;
-    this.components = _.cloneDeep(entity.components);
     this.sceneEntity = entity;
-    this.onComponentsChanged = onComponentsChanged;
+    this._components.next(_.cloneDeep(entity.components));
+  }
+
+  get components() {
+    return this._components.value;
+  }
+
+  get componentsObservable() {
+    return this._components.asObservable()
+      .pipe(
+        distinctUntilChanged(),
+        debounceTime(0),
+        subscribeOn(asyncScheduler),
+      );
   }
 
   get componentTypes() {
@@ -22,6 +47,7 @@ export default class Entity {
     return this._switch.asObservable().pipe(
       distinctUntilChanged(),
       delay(0),
+      subscribeOn(asyncScheduler),
     );
   }
 
@@ -33,15 +59,31 @@ export default class Entity {
     this._switch.next(value);
   }
 
-  addComponent(componentName, component) {
+  addComponent(componentName, componentData) {
+    // Only one component per type is allowed - dispose the old one first.
     this.disposeComponent(componentName);
-    this.components[componentName] = component;
-    this.onComponentsChanged(this);
+    const newComponent = makeComponent(componentName, componentData);
+    _.chain(this.components)
+      // .pickBy(other => _.intersection(other.tags, newComponent.tags).length > 0)
+      // .tap(x => console.log('XXX Chain START:', x))
+      .pickBy(other => {
+        const intersection = _.intersection(other.tags, newComponent.tags);
+        // console.log('other:', other, 'compData:', newComponent.tags, 'intersection: ', intersection);
+        return intersection.length > 0;
+      })
+      // .tap(x => console.log('XXX intersected:', x, 'allComp:', this.components))
+      .forEach((__, otherName) => { 
+        // console.log('XXX disposeComp:',otherName, 'tags:', __.tags);
+        this.removeComponent(otherName);
+      })
+      .value();
+    this._components.next({ ...this.components, [componentName]: newComponent });
+    console.log('XXX makeComponent', newComponent);
   }
 
   removeComponent(componentName) {
-    delete this.components[componentName];
-    this.onComponentsChanged(this);
+    this.disposeComponent(componentName);
+    this._components.next(_.omit(this.components, [componentName]));
   }
 
   disposeComponent(componentName) {
@@ -49,10 +91,12 @@ export default class Entity {
     if (oldComponent && oldComponent.dispose) {
       oldComponent.dispose(null);
     }
+    delete this.components[componentName];
   }
 
   dispose() {
     Object.keys(this.components).forEach(this.disposeComponent.bind(this));
+    this._components.complete();
     this._switch.complete();
     this.subscriptions.forEach(s => s.subscription.unsubscribe());
     this.subscriptions = [];
