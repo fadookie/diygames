@@ -110,6 +110,22 @@ export const generateTestSceneEntities = () => ([
           { type: 'Switch', set:false },
         ],
       },
+      Script2: {
+        triggers: [
+          { type: 'Switch', target:'Self', changingTo:true },
+        ],
+        actions: [
+          { type: 'SetComponent', component: 'DirectionalMovement', velocity: { x: 0, y: 1 } },
+        ],
+      },
+      Script3: {
+        triggers: [
+          { type: 'Switch', target:'Self', changingTo:false },
+        ],
+        actions: [
+          { type: 'SetComponent', component: 'DirectionalMovement', velocity: { x: 0, y: -1 } },
+        ],
+      },
     }
   }
 ]);

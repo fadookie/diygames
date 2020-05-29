@@ -119,4 +119,4 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
   }
 });
 
-export default _.range(0, 2).map(i => new (makeScriptSystem(`Script${i}`))());
+export default _.range(0, 6).map(i => new (makeScriptSystem(`Script${i}`))());
