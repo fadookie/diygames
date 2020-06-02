@@ -1,8 +1,11 @@
+import type { TransformProperty, RendererProperty, Context } from './types';
+import type Entity from './Entity';
+
 export default class RenderSystem {
   targetGroup = ['Renderer', 'Transform'];
   entities = [];
 
-  execute(e, { p5 }) {
+  execute(e : Entity<TransformProperty & RendererProperty>, { p5 } : Context) {
     const renderComp = e.components.Renderer;
     const transform = e.components.Transform;
     // console.log(`@@@ render e:${e.id} at:`, transform);

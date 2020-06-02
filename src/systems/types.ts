@@ -1,3 +1,4 @@
+import type p5 from 'p5';
 import type { Observable, Subscription  } from 'rxjs';
 
 //#region Misc
@@ -16,7 +17,7 @@ export type GlobalEvent = { type: string, data: { mousePos: Point2D } };
 
 export type GlobalEventBus = Observable<GlobalEvent>;
 
-export type Context = { globalEventBus: GlobalEventBus };
+export type Context = { p5: p5, globalEventBus: GlobalEventBus };
 
 //#endregion Misc
 
@@ -37,6 +38,11 @@ export interface ColliderRuntime extends ComponentBase {
 
 export interface DirectionalMovement extends ComponentBase {
   velocity: Point2D,
+}
+
+export interface Renderer extends ComponentBase {
+  strokeColor: [number, number, number],
+  fillColor: [number, number, number],
 }
 
 export interface Transform extends ComponentBase {
@@ -62,6 +68,10 @@ export interface ColliderRuntimeProperty extends ComponentsBase {
 
 export interface DirectionalMovementProperty extends ComponentsBase {
   DirectionalMovement: DirectionalMovement,
+}
+
+export interface RendererProperty extends ComponentsBase {
+  Renderer: Renderer,
 }
 
 export interface TransformProperty extends ComponentsBase {
