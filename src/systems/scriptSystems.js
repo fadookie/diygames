@@ -26,6 +26,8 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
     // e.isSetupDoneForScriptSystem = true;
   }
 
+  //#region  helpers
+
   assert(condition, message, e) {
     if (!condition) throw this.getError(message, e);
   }
@@ -86,6 +88,8 @@ const makeScriptSystem = (scriptNumber) => (class ScriptSystem {
       }
     });
   }
+
+  //#endregion
 
   reactToData(e, context) {
     const triggerObservables = this.parseTriggers(e, context);

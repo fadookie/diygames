@@ -1,18 +1,40 @@
 import _ from 'lodash';
-import { BehaviorSubject, asyncScheduler,  } from 'rxjs';
+import { BehaviorSubject, asyncScheduler, Observable  } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import { delay, subscribeOn, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import type { GlobalEvent } from './types';
 
-type Component = {
+interface Collider extends ComponentBase {
+  type: 'AABB';
+}
+
+interface ColliderRuntime extends ComponentBase {
+  onTap: Observable<GlobalEvent>,
+  dispose: () => void,
+}
+
+export interface ColliderProperty extends ComponentsBase {
+  Collider: Collider,
+}
+
+export interface ColliderRuntimeProperty extends ComponentsBase {
+  ColliderRuntime: ColliderRuntime,
+}
+
+export interface ComponentBase {
   tags?: string[],
   dispose?: () => void,
 }
 
-type Components = {
-  [index: string]: Component,
+type Component = ComponentBase | Collider | ColliderRuntime;
+
+export interface ComponentsBase {
+  [index: string]: ComponentBase,
 }
 
-type SubscriptionToken = {
+type Components = ComponentsBase & Partial<ColliderProperty> & Partial<ColliderRuntimeProperty>;
+
+interface SubscriptionToken {
   system: Object,
   subscription: Subscription,
 }
@@ -29,7 +51,7 @@ function makeComponent(componentName : string, componentData : Component) : Comp
   }
 }
 
-export default class Entity {
+export default class Entity<ComponentsType extends ComponentsBase> {
   id: string;
   sceneEntity: Object;
   subscriptions : SubscriptionToken[] = []
@@ -42,8 +64,12 @@ export default class Entity {
     this._components.next(_.cloneDeep(entity.components));
   }
 
-  get components() {
-    return this._components.value;
+  get components() : ComponentsType {
+    if (this._components.value as ComponentsType) {
+      return this._components.value as ComponentsType;
+    } else {
+      throw new Error();
+    }
   }
 
   get componentsObservable() {
