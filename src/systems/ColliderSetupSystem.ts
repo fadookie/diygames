@@ -1,8 +1,8 @@
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { pointIntersectsAABB } from '../utils/collision';
-import type { Context } from './types';
-import type { default as Entity, ColliderProperty, ColliderRuntimeProperty } from './Entity';
+import type { Context, ColliderProperty, ColliderRuntimeProperty } from './types';
+import type Entity from './Entity';
 
 export default class ColliderSetupSystem {
   targetGroup = ['Transform', 'Collider'];

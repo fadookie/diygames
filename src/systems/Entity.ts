@@ -1,43 +1,7 @@
 import _ from 'lodash';
-import { BehaviorSubject, asyncScheduler, Observable  } from 'rxjs';
-import type { Subscription } from 'rxjs';
+import { BehaviorSubject, asyncScheduler } from 'rxjs';
 import { delay, subscribeOn, debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import type { GlobalEvent } from './types';
-
-interface Collider extends ComponentBase {
-  type: 'AABB';
-}
-
-interface ColliderRuntime extends ComponentBase {
-  onTap: Observable<GlobalEvent>,
-  dispose: () => void,
-}
-
-export interface ColliderProperty extends ComponentsBase {
-  Collider: Collider,
-}
-
-export interface ColliderRuntimeProperty extends ComponentsBase {
-  ColliderRuntime: ColliderRuntime,
-}
-
-export interface ComponentBase {
-  tags?: string[],
-  dispose?: () => void,
-}
-
-type Component = ComponentBase | Collider | ColliderRuntime;
-
-export interface ComponentsBase {
-  [index: string]: ComponentBase,
-}
-
-type Components = ComponentsBase & Partial<ColliderProperty> & Partial<ColliderRuntimeProperty>;
-
-interface SubscriptionToken {
-  system: Object,
-  subscription: Subscription,
-}
+import type { ComponentsBase, Component, Components, SubscriptionToken } from './types';
 
 function makeComponent(componentName : string, componentData : Component) : Component {
   switch(componentName) {
