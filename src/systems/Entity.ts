@@ -1,8 +1,7 @@
 import _ from 'lodash';
 import { BehaviorSubject, asyncScheduler } from 'rxjs';
-import { delay, subscribeOn, debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import type { ComponentBase, ComponentsBase, ComponentsMap, Component, Components, SubscriptionToken } from './types';
-import { assertNever } from '../utils/tsutils';
+import { map, delay, subscribeOn, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import type { ComponentsMap, Component, Components, SubscriptionToken } from './types';
 
 function makeComponent(componentName : string, componentData : Component) : Component {
   switch(componentName) {
@@ -41,6 +40,7 @@ export default class Entity {
     return this._components.asObservable()
       .pipe(
         distinctUntilChanged(),
+        map(_ => this),
         debounceTime(0),
         subscribeOn(asyncScheduler),
       );

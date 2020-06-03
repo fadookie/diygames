@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import type p5 from 'p5';
 import { Subject, asyncScheduler } from 'rxjs';
 import { subscribeOn } from 'rxjs/operators';
 import Entity from './Entity';
@@ -6,52 +7,57 @@ import RenderSystem from './RenderSystem';
 import DirectionalMovementSystem from './DirectionalMovementSystem';
 import scriptSystems from './scriptSystems';
 import ColliderSetupSystem from './ColliderSetupSystem';
+import { System, ExecutableSystem, SetupSystem, ReactToDataSystem, Scene, GlobalEventBus, SubscriptionToken } from './types';
 
 export default class EcsManager {
-  setupOnlySystems = [
+  setupSystems : SetupSystem[] = [
     new ColliderSetupSystem(),
   ]
 
-  reactiveSystems = [
+  reactiveSystems : ReactToDataSystem<any>[] = [
     ...scriptSystems,
   ]
 
-  updateSystems = [
+  updateSystems : ExecutableSystem[] = [
     new DirectionalMovementSystem(),
   ]
 
-  drawSystems = [
+  drawSystems : ExecutableSystem[] = [
     new RenderSystem(),
   ]
 
   playing = false
 
-  get systems() {
-    return _.uniq([...this.setupOnlySystems,  ...this.reactiveSystems, ...this.updateSystems, ...this.drawSystems]);
+  get systems() : System[] {
+    return _.uniq([...this.setupSystems,  ...this.reactiveSystems, ...this.updateSystems, ...this.drawSystems]);
   }
 
-  runtimeEntities = [];
-  globalEventBus = null;
-  updateSubject = new Subject();
+  p5 : p5;
+  globalEventBus : GlobalEventBus;
+  scene : Scene;
+  runtimeEntities : Entity[] = [];
+  updateSubject = new Subject<void>();
 
   get context() {
     return { p5: this.p5, globalEventBus: this.globalEventBus, entities: this.runtimeEntities };
   }
 
-  constructor(p5, globalEventBus) {
+  constructor(p5 : p5, globalEventBus : GlobalEventBus, scene : Scene) {
     this.p5 = p5;
     this.globalEventBus = globalEventBus;
+    this.scene = scene;
     this.updateSubject.pipe(
       subscribeOn(asyncScheduler),
     ).subscribe(this.onUpdateTick.bind(this));
-    console.log('EcsManager#constructor systesm: ', this.systems);
+    console.log('EcsManager#constructor systems: ', this.systems);
+    this.onSceneChanged(scene);
   }
 
-  onComponentsChanged(entity) {
+  onComponentsChanged(entity : Entity) {
     this.onTargetGroupsChanged();
   }
 
-  onPlayingChanged(playing) {
+  onPlayingChanged(playing : boolean) {
     const prevPlaying = this.playing;
     this.playing = playing;
     if (prevPlaying !== playing) {
@@ -59,7 +65,7 @@ export default class EcsManager {
     }
   }
 
-  onSceneChanged(scene) {
+  onSceneChanged(scene : Scene) {
     this.scene = scene;
     // Re-create runtime entity instances
     // Easy to get caught in infinite recursion here so debounce any group re-creation until the next frame
@@ -74,7 +80,7 @@ export default class EcsManager {
     // Update system's entity list based on components required by targetGroup filter
     // console.log('onTargetGroupsChanged stack:', new Error().stack);
     this.systems.forEach(system => {
-      console.log('@@@onSceneChanged filter for ', system.name);
+      console.log('@@@onSceneChanged filter for ', system.tag);
       system.entities = this.runtimeEntities.filter(entity => {
         const diff = _.difference(
           system.targetGroup,
@@ -86,20 +92,20 @@ export default class EcsManager {
       });
     });
 
-    this.systems.forEach(system => {
-      // Invoke setup systems
-      if (system.setup) {
-        system.entities.forEach(e => {
+    // Invoke setup systems
+    for(let system of this.setupSystems) {
+        for (let e of system.entities) {
           system.setup(e, this.context);
-        });
-      }
+        }
+    }
 
-      // Refresh subscriptions for reactToData systems
+    // Refresh subscriptions for reactToData systems
+    for(let system of this.reactiveSystems) {
       console.log('@@@ refresh subs. playing:', this.playing, 'system:', system.tag, 'reactToData:', system.reactToData);
-      if (this.playing && system.reactToData) {
+      if (this.playing) {
         console.log('Refresh subscriptions for ', system.constructor.name, system.tag);
-        const systemSubscriptionPredicate = systemSubscription => systemSubscription.system === system;
-        system.entities.forEach(e => {
+        const systemSubscriptionPredicate = (systemSubscription : SubscriptionToken) => systemSubscription.system === system;
+        for (let e of system.entities) {
           e.subscriptions
             .filter(systemSubscriptionPredicate)
             .forEach(systemSubscription => {
@@ -108,21 +114,20 @@ export default class EcsManager {
           _.remove(e.subscriptions, systemSubscriptionPredicate);
           const observable = system.reactToData(e, this.context);
           // console.log('reactToData setup e:', e, 'observable:', observable);
-          const subscription = observable.subscribe(x => { system.execute(e, x); })
+          const subscription = observable.subscribe(x => { system.execute(e, this.context, x); })
           e.subscriptions.push({ system, subscription });
-        });
+        }
         console.log('reactToData setup done for', system.constructor.name, ', ents:', system.entities);
       }
-    });
+    }
   }
 
-
-  onUpdate(scene) {
+  onUpdate() {
     if (!this.playing) return;
-    this.updateSubject.next(scene);
+    this.updateSubject.next();
   }
 
-  onUpdateTick(scene) {
+  onUpdateTick() {
     this.updateSystems.forEach(system => {
       system.entities.forEach(e => {
         system.execute(e, this.context);
@@ -130,7 +135,7 @@ export default class EcsManager {
     });
   }
 
-  onDraw(scene) {
+  onDraw() {
     this.drawSystems.forEach(system => {
       system.entities.forEach(e => {
         system.execute(e, this.context);

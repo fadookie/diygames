@@ -1,12 +1,12 @@
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { pointIntersectsAABB } from '../utils/collision';
-import type { Context } from './types';
+import type { SetupSystem, Context, ComponentTypeString } from './types';
 import type Entity from './Entity';
 
-export default class ColliderSetupSystem {
+export default class ColliderSetupSystem implements SetupSystem {
   tag = 'ColliderSetupSystem';
-  targetGroup = ['Transform', 'Collider'];
+  targetGroup : ComponentTypeString[] = ['Transform', 'Collider'];
   entities = [];  
 
   setup(e : Entity, { globalEventBus } : Context) {

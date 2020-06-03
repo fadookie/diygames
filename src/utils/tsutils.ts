@@ -1,3 +1,3 @@
- export function assertNever(x: never): asserts x is never {
+ export function assertNever(x: never): never {
   throw new Error("Unexpected object: " + x);
 }

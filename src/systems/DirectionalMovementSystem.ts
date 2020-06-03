@@ -1,8 +1,9 @@
+import type { ExecutableSystem, ComponentTypeString } from './types';
 import type Entity from './Entity';
 
-export default class DirectionalMovementSystem {
+export default class DirectionalMovementSystem implements ExecutableSystem {
   tag = 'DirectionalMovementSystem';
-  targetGroup = ['Transform', 'DirectionalMovement'];
+  targetGroup : ComponentTypeString[] = ['Transform', 'DirectionalMovement'];
   entities = [];
 
   execute(e : Entity) {

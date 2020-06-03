@@ -1,9 +1,9 @@
-import type { Context } from './types';
+import type { ExecutableSystem, Context, ComponentTypeString } from './types';
 import type Entity from './Entity';
 
-export default class RenderSystem {
+export default class RenderSystem implements ExecutableSystem {
   tag = 'RenderSystem';
-  targetGroup = ['Renderer', 'Transform'];
+  targetGroup : ComponentTypeString[] = ['Renderer', 'Transform'];
   entities = [];
 
   execute(e : Entity, { p5 } : Context) {

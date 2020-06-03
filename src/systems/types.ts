@@ -4,6 +4,8 @@ import type Entity from './Entity';
 
 //#region Misc
 
+export type Color = [number, number, number];
+
 export interface Point2D {
   x: number,
   y: number,
@@ -14,27 +16,52 @@ export interface SubscriptionToken {
   subscription: Subscription,
 }
 
-export type GlobalEvent = { type: string, data: { mousePos: Point2D } };
+export interface GlobalEvent {
+  type: string,
+  data: { mousePos: Point2D }
+};
 
 export type GlobalEventBus = Observable<GlobalEvent>;
 
+export interface Scene {
+  entities: Array<Entity>,
+  bgColor: Color,
+};
+
 export type Context = { p5: p5, globalEventBus: GlobalEventBus, entities: Entity[] };
+
+export interface System {
+  tag: string,
+  targetGroup: Array<Component['type']>,
+  entities: Array<Entity>,  
+}
+
+export interface SetupSystem extends System {
+  setup: (e : Entity, c : Context) => void,
+}
+
+export interface ExecutableSystem extends System {
+  execute: (e : Entity, c : Context) => void,
+}
+
+export interface ReactToDataSystem<T> extends System {
+  reactToData: (e : Entity, c : Context) => Observable<T>,
+  execute: (e : Entity, c : Context, data : T) => void,
+}
 
 //#endregion Misc
 
 
 //#region Script Components
 
-export type ComponentName = 'DirectionalMovement';
-
 export interface TapTrigger {
   type: 'TapTrigger',
-  target: string,
+  target: 'Any' | 'Self',
 }
 
 export interface SwitchTrigger {
   type: 'Switch',
-  target: 'Any' | 'Self',
+  target: string,
   changingTo: boolean,
 }
 
@@ -44,7 +71,7 @@ export type ActionType = 'SetComponent' | 'Switch';
 
 export interface SetComponentAction {
   type: 'SetComponent',
-  componentName: ComponentName,
+  componentName: ComponentTypeString,
   component: Component,
 }
 
@@ -111,8 +138,8 @@ export interface DirectionalMovement extends ComponentBase {
 
 export interface Renderer extends ComponentBase {
   type: 'Renderer',
-  strokeColor: [number, number, number],
-  fillColor: [number, number, number],
+  strokeColor: Color,
+  fillColor: Color,
 }
 
 // Script is defined above
@@ -126,7 +153,9 @@ export interface Transform extends ComponentBase {
   }
 }
 
-export type Component = Collider | ColliderRuntime | DirectionalMovement | Renderer | Script0 | Script1 | Script2 | Script3 | Transform ;
+export type Component = Collider | ColliderRuntime | DirectionalMovement | Renderer | Script0 | Script1 | Script2 | Script3 | Transform;
+
+export type ComponentTypeString = Component['type'];
 
 //#endregion Components
 

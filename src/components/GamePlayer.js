@@ -11,20 +11,19 @@ function createSketch(sceneRef, sketchRef, node) {
   const globalEventBus = new Subject();
   const sketch = (p5instance) => {
     const p = p5instance;
-    ecsManager = new EcsManager(p, globalEventBus);
+    ecsManager = new EcsManager(p, globalEventBus, sceneRef.current);
     sketch.onPlayingChanged = ecsManager.onPlayingChanged.bind(ecsManager);
-    ecsManager.onSceneChanged(sceneRef.current);
     p.setup = () => {
       p.createCanvas(500, 500);
       // p.colorMode(p.HSB);
     };
     p.draw = () => {
-      ecsManager.onUpdate(sceneRef.current);
+      ecsManager.onUpdate();
 
       const { bgColor } = sceneRef.current;
       p.background(bgColor);
 
-      ecsManager.onDraw(sceneRef.current);
+      ecsManager.onDraw();
     };
     p.mousePressed = (event) => {
       globalEventBus.next({ type: 'Tap', data: { mousePos: { x: p.mouseX, y: p.mouseY } }});

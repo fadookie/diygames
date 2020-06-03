@@ -2,34 +2,15 @@ import _ from 'lodash';
 import { merge } from 'rxjs';
 import { filter, map, skip, withLatestFrom } from 'rxjs/operators';
 import { every, flow, identity } from 'lodash/fp';
-import type { Context } from './types';
+import type { ReactToDataSystem, ComponentTypeString, Context } from './types';
 import Entity from './Entity';
 import { assertNever } from '../utils/tsutils';
-/*
-Script0: {
-  triggers: [
-    { type: 'TapTrigger', target:'Self' },
-    { type: 'Switch', target:'Self', condition:true }
-  ],
-  conditions: [
-      { type: 'Switch', target:'Self', condition:false },
-  ]
-  actions: [
-    { type: 'SetComponent', component: 'DirectionalMovement', velocity: { x: 1, y: 0 } },
-    { type: 'Switch', set:false },
-  ],
-},
-*/
 
 type ScriptName = 'Script0' | 'Script1' | 'Script2' | 'Script3' ;
 
-function isEntity(x : any): x is boolean {
-  return !!(x as Entity);
-}
-
-const makeScriptSystem = (scriptNumber : ScriptName) => (class ScriptSystem {
+const makeScriptSystem = (scriptNumber : ScriptName) => (class ScriptSystem implements ReactToDataSystem<{ trigger: any, conditions: any[] }> {
   tag = `${scriptNumber}System`;
-  targetGroup = ['ColliderRuntime', scriptNumber];
+  targetGroup : ComponentTypeString[] = ['ColliderRuntime', scriptNumber];
   entities = [];
 
   //#region  helpers
@@ -45,13 +26,14 @@ const makeScriptSystem = (scriptNumber : ScriptName) => (class ScriptSystem {
   findTarget(e : Entity, target : string, { entities } : Context) : Entity {
     if (target === 'Self') return e;
     const other = entities.find(other => other.id === target);
-    this.assert(isEntity(other), `Unrecognized switch target: '${target}'`, e);
+    this.assert(!!other, `Unrecognized switch target: '${target}'`, e);
     return other;
   }
 
   parseTriggers(e : Entity, context : Context) {
     const { globalEventBus } = context;
     const triggers = e.componentByType(scriptNumber).triggers;
+    //eslint-disable-next-line array-callback-return
     return triggers.map((trigger, triggerIndex) => {
           switch(trigger.type) {
             case 'TapTrigger': {
@@ -64,6 +46,7 @@ const makeScriptSystem = (scriptNumber : ScriptName) => (class ScriptSystem {
                 } case 'Self': {
                   return e.componentByType('ColliderRuntime').onTap;
                 } default: {
+                  assertNever(trigger.target);
                   throw this.getError(`Unrecognized tap target: '${trigger.target}'`, e);
                 }
               }
@@ -76,7 +59,6 @@ const makeScriptSystem = (scriptNumber : ScriptName) => (class ScriptSystem {
             } default: {
               assertNever(trigger);
               // throw this.getError(`Unrecognized trigger type: ${trigger.type}`, e);
-              throw this.getError(`Unrecognized trigger on: ${trigger}`, e); // This will never get hit but appeases compiler
             }
           }
         });
@@ -115,7 +97,7 @@ const makeScriptSystem = (scriptNumber : ScriptName) => (class ScriptSystem {
             );
   }
 
-  execute(e : Entity, data : any) {
+  execute(e : Entity, context: Context, data : any) {
     console.log(`@@@${scriptNumber}System#exectute e:`, e, 'data:', data);
     const script = e.componentByType(scriptNumber);
     script.actions.forEach(action => {
