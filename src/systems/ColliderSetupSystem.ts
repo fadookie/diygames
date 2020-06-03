@@ -1,21 +1,23 @@
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { pointIntersectsAABB } from '../utils/collision';
-import type { Context, ColliderProperty, ColliderRuntimeProperty } from './types';
+import type { Context } from './types';
 import type Entity from './Entity';
 
 export default class ColliderSetupSystem {
+  tag = 'ColliderSetupSystem';
   targetGroup = ['Transform', 'Collider'];
   entities = [];  
 
-  setup(e : Entity<ColliderProperty & Partial<ColliderRuntimeProperty>>, { globalEventBus } : Context) {
+  setup(e : Entity, { globalEventBus } : Context) {
     if (e.components.ColliderRuntime) return;
 
-    const collider = e.components.Collider;
-    if (collider.type !== 'AABB') throw new Error(`Unrecognized collision type '${collider.type}'`);
+    const collider = e.componentByType('Collider');
+    if (collider.colliderType !== 'AABB') throw new Error(`Unrecognized collision type '${collider.type}'`);
 
     const onDispose = new Subject();
-    e.addComponent('ColliderRuntime', {
+    e.addComponent({
+      type: 'ColliderRuntime',
       onTap: globalEventBus
         .pipe(
           filter(evt => evt.type === 'Tap'

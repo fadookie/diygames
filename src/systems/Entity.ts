@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import { BehaviorSubject, asyncScheduler } from 'rxjs';
 import { delay, subscribeOn, debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import type { ComponentsBase, Component, Components, SubscriptionToken } from './types';
+import type { ComponentBase, ComponentsBase, ComponentsMap, Component, Components, SubscriptionToken } from './types';
+import { assertNever } from '../utils/tsutils';
 
 function makeComponent(componentName : string, componentData : Component) : Component {
   switch(componentName) {
@@ -15,7 +16,7 @@ function makeComponent(componentName : string, componentData : Component) : Comp
   }
 }
 
-export default class Entity<ComponentsType extends ComponentsBase> {
+export default class Entity {
   id: string;
   sceneEntity: Object;
   subscriptions : SubscriptionToken[] = []
@@ -28,12 +29,12 @@ export default class Entity<ComponentsType extends ComponentsBase> {
     this._components.next(_.cloneDeep(entity.components));
   }
 
-  get components() : ComponentsType {
-    if (this._components.value as ComponentsType) {
-      return this._components.value as ComponentsType;
-    } else {
-      throw new Error();
-    }
+  get components() {
+    return this._components.value;
+  }
+
+  componentByType<T extends Component['type']>(key : T) : ComponentsMap[T] {
+    return this._components.value[key] as ComponentsMap[T];
   }
 
   get componentsObservable() {
@@ -66,7 +67,8 @@ export default class Entity<ComponentsType extends ComponentsBase> {
     this._switch.next(value);
   }
 
-  addComponent(componentName : string, componentData : Component) {
+  addComponent(componentData : Component) {
+    const componentName = componentData.type;
     // Only one component per type is allowed - dispose the old one first.
     this.disposeComponent(componentName);
     const newComponent = makeComponent(componentName, componentData);

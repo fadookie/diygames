@@ -44,6 +44,7 @@ export default class EcsManager {
     this.updateSubject.pipe(
       subscribeOn(asyncScheduler),
     ).subscribe(this.onUpdateTick.bind(this));
+    console.log('EcsManager#constructor systesm: ', this.systems);
   }
 
   onComponentsChanged(entity) {
@@ -73,7 +74,7 @@ export default class EcsManager {
     // Update system's entity list based on components required by targetGroup filter
     // console.log('onTargetGroupsChanged stack:', new Error().stack);
     this.systems.forEach(system => {
-      // console.log('@@@onSceneChanged filter for ', system.name);
+      console.log('@@@onSceneChanged filter for ', system.name);
       system.entities = this.runtimeEntities.filter(entity => {
         const diff = _.difference(
           system.targetGroup,
@@ -94,6 +95,7 @@ export default class EcsManager {
       }
 
       // Refresh subscriptions for reactToData systems
+      console.log('@@@ refresh subs. playing:', this.playing, 'system:', system.tag, 'reactToData:', system.reactToData);
       if (this.playing && system.reactToData) {
         console.log('Refresh subscriptions for ', system.constructor.name, system.tag);
         const systemSubscriptionPredicate = systemSubscription => systemSubscription.system === system;

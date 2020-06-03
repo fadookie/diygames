@@ -1,13 +1,14 @@
-import type { TransformProperty, RendererProperty, Context } from './types';
+import type { Context } from './types';
 import type Entity from './Entity';
 
 export default class RenderSystem {
+  tag = 'RenderSystem';
   targetGroup = ['Renderer', 'Transform'];
   entities = [];
 
-  execute(e : Entity<TransformProperty & RendererProperty>, { p5 } : Context) {
-    const renderComp = e.components.Renderer;
-    const transform = e.components.Transform;
+  execute(e : Entity, { p5 } : Context) {
+    const renderComp = e.componentByType('Renderer');
+    const transform = e.componentByType('Transform');
     // console.log(`@@@ render e:${e.id} at:`, transform);
     p5.push();
     if (renderComp.strokeColor) {
