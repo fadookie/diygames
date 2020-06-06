@@ -87,7 +87,7 @@ export default class Entity {
       })
       .value();
     this._components.next({ ...this.components, [componentName]: newComponent });
-    console.log('XXX makeComponent', newComponent);
+    // console.log('XXX makeComponent', newComponent);
   }
 
   removeComponent(componentName : string) {

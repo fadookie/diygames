@@ -16,10 +16,17 @@ export interface SubscriptionToken {
   subscription: Subscription,
 }
 
-export interface GlobalEvent {
-  type: string,
-  data: { mousePos: Point2D }
+export interface GlobalTapEvent {
+  type: 'Tap',
+  data: { mousePos: Point2D },
 };
+
+export interface GlobalTimeSegmentEvent {
+  type: 'TimeSegment',
+  segment: number,
+};
+
+export type GlobalEvent = GlobalTapEvent | GlobalTimeSegmentEvent;
 
 export type GlobalEventBus = Observable<GlobalEvent>;
 
@@ -57,6 +64,11 @@ export interface ReactToDataSystem<T> extends System {
 export interface TapTrigger {
   type: 'TapTrigger',
   target: 'Any' | 'Self',
+}
+
+export interface TimeSegmentTrigger {
+  type: 'TimeSegment',
+  segment: number,
 }
 
 export interface SwitchTrigger {

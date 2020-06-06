@@ -49,7 +49,7 @@ export default class EcsManager {
     this.updateSubject.pipe(
       subscribeOn(asyncScheduler),
     ).subscribe(this.onUpdateTick.bind(this));
-    console.log('EcsManager#constructor systems: ', this.systems);
+    // console.log('EcsManager#constructor systems: ', this.systems);
     this.onSceneChanged(scene);
   }
 
@@ -80,7 +80,7 @@ export default class EcsManager {
     // Update system's entity list based on components required by targetGroup filter
     // console.log('onTargetGroupsChanged stack:', new Error().stack);
     this.systems.forEach(system => {
-      console.log('@@@onSceneChanged filter for ', system.tag);
+      // console.log('@@@onSceneChanged filter for ', system.tag);
       system.entities = this.runtimeEntities.filter(entity => {
         const diff = _.difference(
           system.targetGroup,
@@ -101,9 +101,9 @@ export default class EcsManager {
 
     // Refresh subscriptions for reactToData systems
     for(let system of this.reactiveSystems) {
-      console.log('@@@ refresh subs. playing:', this.playing, 'system:', system.tag, 'reactToData:', system.reactToData);
+      // console.log('@@@ refresh subs. playing:', this.playing, 'system:', system.tag, 'reactToData:', system.reactToData);
       if (this.playing) {
-        console.log('Refresh subscriptions for ', system.constructor.name, system.tag);
+        // console.log('Refresh subscriptions for ', system.constructor.name, system.tag);
         const systemSubscriptionPredicate = (systemSubscription : SubscriptionToken) => systemSubscription.system === system;
         for (let e of system.entities) {
           e.subscriptions
@@ -117,7 +117,7 @@ export default class EcsManager {
           const subscription = observable.subscribe(x => { system.execute(e, this.context, x); })
           e.subscriptions.push({ system, subscription });
         }
-        console.log('reactToData setup done for', system.constructor.name, ', ents:', system.entities);
+        // console.log('reactToData setup done for', system.constructor.name, ', ents:', system.entities);
       }
     }
   }

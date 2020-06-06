@@ -98,10 +98,10 @@ const makeScriptSystem = (scriptNumber : ScriptName) => (class ScriptSystem impl
   }
 
   execute(e : Entity, context: Context, data : any) {
-    console.log(`@@@${scriptNumber}System#exectute e:`, e, 'data:', data);
+    // console.log(`@@@${scriptNumber}System#exectute e:`, e, 'data:', data);
     const script = e.componentByType(scriptNumber);
     script.actions.forEach(action => {
-      console.log(`@@@${scriptNumber}#exectute process action:`, action);
+      // console.log(`@@@${scriptNumber}#exectute process action:`, action);
       switch(action.type) {
         case 'SetComponent': {
           e.addComponent(action.component);
