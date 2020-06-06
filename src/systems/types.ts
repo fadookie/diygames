@@ -67,7 +67,7 @@ export interface TapTrigger {
 }
 
 export interface TimeSegmentTrigger {
-  type: 'TimeSegment',
+  type: 'TimeSegmentTrigger',
   segment: number,
 }
 
@@ -77,7 +77,7 @@ export interface SwitchTrigger {
   changingTo: boolean,
 }
 
-export type Trigger = TapTrigger | SwitchTrigger;
+export type Trigger = TapTrigger | TimeSegmentTrigger | SwitchTrigger;
 
 export type ActionType = 'SetComponent' | 'Switch';
 

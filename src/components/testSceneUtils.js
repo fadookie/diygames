@@ -20,10 +20,9 @@ export const generateBaseEntity = (id) => ({
     Script0: {
       type: 'Script0',
       triggers: [
-        { type: 'TapTrigger', target:'Self' },
+        { type: 'TimeSegmentTrigger', segment: 3 },
       ],
       conditions: [
-        { type: 'Switch', target:'Self', condition:false },
       ],
       actions: [
         { type: 'SetComponent', component: { type: 'DirectionalMovement', velocity: { x: 1, y: 0 } } },
@@ -45,6 +44,52 @@ export const generateBaseEntity = (id) => ({
     },
   },
 });
+
+// export const generateBaseEntity = (id) => ({
+//   id,
+//   components: {
+//     Transform: {
+//       type: 'Transform',
+//       pos: { x: _.random(0, 200), y: _.random(0, 200) },
+//       size: { w: 50, h: 50 },
+//     },
+//     Renderer: {
+//       type: 'Renderer',
+//       strokeColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
+//       fillColor: [_.random(0, 255), _.random(0, 255), _.random(0, 255)],
+//     },
+//     Collider: {
+//       type: 'Collider',
+//       colliderType: 'AABB',
+//     },
+//     Script0: {
+//       type: 'Script0',
+//       triggers: [
+//         { type: 'TapTrigger', target:'Self' },
+//       ],
+//       conditions: [
+//         { type: 'Switch', target:'Self', condition:false },
+//       ],
+//       actions: [
+//         { type: 'SetComponent', component: { type: 'DirectionalMovement', velocity: { x: 1, y: 0 } } },
+//         { type: 'Switch', target:'Self', set:true },
+//       ],
+//     },
+//     Script1: {
+//       type: 'Script1',
+//       triggers: [
+//         { type: 'TapTrigger', target:'Self' },
+//       ],
+//       conditions: [
+//         { type: 'Switch', target:'Self', condition:true },
+//       ],
+//       actions: [
+//         { type: 'SetComponent', component: { type: 'DirectionalMovement', velocity: { x: -1, y: 0 } } },
+//         { type: 'Switch', set:false },
+//       ],
+//     },
+//   },
+// });
 
 export const generateTestSceneEntities = () => ([
   {

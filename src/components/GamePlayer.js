@@ -2,7 +2,7 @@ import React, { useEffect, useCallback, useRef, useContext } from 'react';
 import P5 from 'p5';
 import _ from 'lodash';
 import { Subject, interval, BehaviorSubject, NEVER } from 'rxjs';
-import { take, map, switchMap } from 'rxjs/operators';
+import { take, map, tap, switchMap } from 'rxjs/operators';
 import GameContext from '../state/GameContext';
 import EcsManager from '../systems/EcsManager';
 
@@ -26,6 +26,7 @@ function createSketch(sceneRef, sketchRef, node) {
             map(i => ({ type: 'TimeSegment', segment: i + 1 })),
           )
         : NEVER),
+      tap(console.log.bind(console, 'TIME:')),
     );
   timelineObservable.subscribe(globalEventBus);
 

@@ -47,9 +47,13 @@ const makeScriptSystem = (scriptNumber : ScriptName) => (class ScriptSystem impl
                   return e.componentByType('ColliderRuntime').onTap;
                 } default: {
                   assertNever(trigger.target);
-                  throw this.getError(`Unrecognized tap target: '${trigger.target}'`, e);
+                  throw this.getError(`Unrecognized tap target: '${trigger}'`, e);
                 }
               }
+            } case 'TimeSegmentTrigger': {
+              return globalEventBus.pipe(
+                filter(evt => evt.type === 'TimeSegment' && evt.segment === trigger.segment),
+              );
             } case 'Switch': {
               return this.findTarget(e, trigger.target, context).switchObservable.pipe(
                 skip(1), // BehaviorSubject emits current value on subscribe, but we don't want this in case we're re-subscribing
