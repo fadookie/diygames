@@ -24,6 +24,7 @@ export interface GlobalTapEvent {
 export interface GlobalTimeSegmentEvent {
   type: 'TimeSegment',
   segment: number,
+  special? : 'Start' | 'End',
 };
 
 export type GlobalEvent = GlobalTapEvent | GlobalTimeSegmentEvent;
@@ -165,7 +166,12 @@ export interface Transform extends ComponentBase {
   }
 }
 
-export type Component = Collider | ColliderRuntime | DirectionalMovement | Renderer | Script0 | Script1 | Script2 | Script3 | Transform;
+export interface WinCondition extends ComponentBase {
+  type: 'WinCondition',
+  expectedSwitchState: boolean,
+}
+
+export type Component = Collider | ColliderRuntime | DirectionalMovement | Renderer | Script0 | Script1 | Script2 | Script3 | Transform | WinCondition;
 
 export type ComponentTypeString = Component['type'];
 
@@ -185,6 +191,7 @@ export interface ComponentsMap {
   Script2: Script2,
   Script3: Script3,
   Transform: Transform,
+  WinCondition: WinCondition,
 }
 
 export type Components = ComponentsBase;

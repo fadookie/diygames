@@ -1,8 +1,9 @@
 import React, { useEffect, useCallback, useRef, useContext } from 'react';
 import P5 from 'p5';
 import _ from 'lodash';
+import produce from 'immer';
 import { Subject, interval, BehaviorSubject, NEVER } from 'rxjs';
-import { take, map, tap, switchMap } from 'rxjs/operators';
+import { take, map, tap, switchMap, startWith } from 'rxjs/operators';
 import GameContext from '../state/GameContext';
 import EcsManager from '../systems/EcsManager';
 
@@ -22,8 +23,18 @@ function createSketch(sceneRef, sketchRef, node) {
     isPlaying.asObservable().pipe(
       switchMap(playing => playing
         ? interval(GAME_TIME_SEGMENT_LENGTH_MS).pipe(
+            startWith(-1),
             take(NUM_GAME_TIME_SEGMENTS),
-            map(i => ({ type: 'TimeSegment', segment: i + 1 })),
+            map(i => {
+              const segment = i + 1;
+              return produce({ type: 'TimeSegment', segment }, draft => {
+                if(segment === 0) {
+                  draft.special = 'Start';
+                } else if(segment === NUM_GAME_TIME_SEGMENTS - 1) {
+                  draft.special = 'End';
+                }
+              });
+            }),
           )
         : NEVER),
       tap(console.log.bind(console, 'TIME:')),
