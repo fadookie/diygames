@@ -1,5 +1,11 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Requirements to run
+* [node.js](https://nodejs.org/en/download/)
+* [npm](https://www.npmjs.com/get-npm) (usually included with node) or [yarn](https://yarnpkg.com/getting-started/install)
+
+The commands for `npm` and `yarn` are interchangeable for most simple use cases.
+
 ## Available Scripts
 
 In the project directory, you can run:
