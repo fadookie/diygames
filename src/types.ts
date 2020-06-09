@@ -9,6 +9,14 @@ export interface Point2D {
   y: number,
 }
 
+export interface Rect2D {
+  pos: Point2D,
+  size: {
+    w: number,
+    h: number,
+  }
+}
+
 export interface GlobalTapEvent {
   type: 'Tap',
   data: { mousePos: Point2D },
@@ -134,13 +142,8 @@ export interface Renderer extends ComponentBase {
 
 // Script is defined above
 
-export interface Transform extends ComponentBase {
+export interface Transform extends ComponentBase, Rect2D {
   type: 'Transform',
-  pos: Point2D,
-  size: {
-    w: number,
-    h: number,
-  }
 }
 
 export interface StopMovement extends ComponentBase {
