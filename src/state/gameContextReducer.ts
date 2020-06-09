@@ -1,6 +1,7 @@
 import _ from 'lodash';
+import { clamp } from 'lodash/fp';
 import produce from 'immer';
-import type { Action, AddEntitiesAction, StaticScene, StaticEntity } from '../types';
+import type { Action, AddEntitiesAction, Color, StaticScene, StaticEntity } from '../types';
 import { assertNever } from '../utils/tsutils';
 
 export const initialState : StaticScene = {
@@ -36,8 +37,8 @@ export default (state : StaticScene, action : Action) : StaticScene => {
     } case 'clearEntities': {
       return { ...state, entities: [] };
     } case 'setBgColor': {
-      const color = _.clamp(action.color, 0, 255);
-      return { ...state, bgColor: [color, color, color] };
+      const color = action.color.map(clamp(0, 255)) as Color;
+      return { ...state, bgColor: color };
     } default:
       assertNever(action);
   }

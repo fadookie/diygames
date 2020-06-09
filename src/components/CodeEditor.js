@@ -1,3 +1,5 @@
+// No type annotations exist for prism-core so I can't port this component to TS easily
+// It's going to be removed when the GUI is done anyway so not gonna bother with it now
 import React, { useState, useEffect, useMemo, useContext } from 'react';
 import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs/components/prism-core';

@@ -47,7 +47,7 @@ function createSketch(sceneRef : SceneRef, sketchRef : SketchRef, node : any) {
             }),
           )
         : NEVER),
-      tap(console.log.bind(console, 'TIME:')),
+      tap(x => console.log('TIME:', x.segment)),
     );
   timelineObservable.subscribe(globalEventBus);
 

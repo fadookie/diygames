@@ -196,7 +196,7 @@ export interface SetEntitiesAction {
 
 export interface RemoveEntitiesAction {
   type: 'removeEntities',
-  entityIds: StaticEntity['id'],
+  entityIds: Array<StaticEntity['id']>,
 }
 
 export interface ClearEntitiesAction {
@@ -205,7 +205,7 @@ export interface ClearEntitiesAction {
 
 export interface SetBgColorAction {
   type: 'setBgColor',
-  color: number,
+  color: Color,
 }
 
 export type Action = AddEntitiesAction | SetEntitiesAction | RemoveEntitiesAction | ClearEntitiesAction | SetBgColorAction;

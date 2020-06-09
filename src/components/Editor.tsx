@@ -3,6 +3,7 @@ import GamePlayer from './GamePlayer';
 import GameContext from '../state/GameContext';
 import CodeEditor from './CodeEditor';
 import { generateBaseEntity, generateTestSceneEntities } from './testSceneUtils';
+import type { Color } from '../types';
 import './Editor.css';
 
 function Editor() {
@@ -11,7 +12,7 @@ function Editor() {
 
   const [gamePlaying, setGamePlaying] = useState(true);
 
-  const addEntity = (id) => {
+  const addEntity = (id : string) => {
     gameDispatch({
       type: 'addEntities',
       entities: [generateBaseEntity(id)],
@@ -39,8 +40,8 @@ function Editor() {
     });
   };
 
-  const shiftBgColor = (amount) => {
-    gameDispatch({ type: 'setBgColor', color: gameState.bgColor + amount });
+  const shiftBgColor = (amount : number) => {
+    gameDispatch({ type: 'setBgColor', color: gameState.bgColor.map(c => c + amount) as Color });
   };
 
   return (
