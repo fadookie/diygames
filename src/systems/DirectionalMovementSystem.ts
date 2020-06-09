@@ -1,4 +1,5 @@
-import type { ExecutableSystem, ComponentTypeString } from './types';
+import type { ComponentTypeString } from '../types';
+import type { ExecutableSystem } from './types';
 import type Entity from './Entity';
 
 export default class DirectionalMovementSystem implements ExecutableSystem {

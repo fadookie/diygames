@@ -8,7 +8,8 @@ import DirectionalMovementSystem from './DirectionalMovementSystem';
 import scriptSystems from './scriptSystems';
 import WinConditionSystem from './WinConditionSystem';
 import ColliderSetupSystem from './ColliderSetupSystem';
-import { System, ExecutableSystem, SetupSystem, ReactToDataSystem, ReactToGroupDataSystem, Scene, GlobalEventBus, SubscriptionToken } from './types';
+import type { GlobalEventBus, StaticScene } from '../types';
+import { System, ExecutableSystem, SetupSystem, ReactToDataSystem, ReactToGroupDataSystem, SubscriptionToken } from './types';
 
 export default class EcsManager {
   setupSystems : SetupSystem[] = [
@@ -39,7 +40,8 @@ export default class EcsManager {
 
   p5 : p5;
   globalEventBus : GlobalEventBus;
-  scene : Scene;
+  // TODO Make Scene generic on Entity type?
+  scene : StaticScene;
   runtimeEntities : Entity[] = [];
   updateSubject = new Subject<void>();
 
@@ -47,7 +49,7 @@ export default class EcsManager {
     return { p5: this.p5, globalEventBus: this.globalEventBus, entities: this.runtimeEntities };
   }
 
-  constructor(p5 : p5, globalEventBus : GlobalEventBus, scene : Scene) {
+  constructor(p5 : p5, globalEventBus : GlobalEventBus, scene : StaticScene) {
     this.p5 = p5;
     this.globalEventBus = globalEventBus;
     this.scene = scene;
@@ -70,7 +72,7 @@ export default class EcsManager {
     }
   }
 
-  onSceneChanged(scene : Scene) {
+  onSceneChanged(scene : StaticScene) {
     this.scene = scene;
     // Re-create runtime entity instances
     // Easy to get caught in infinite recursion here so debounce any group re-creation until the next frame

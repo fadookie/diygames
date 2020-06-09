@@ -1,7 +1,9 @@
 import _ from 'lodash';
 import { BehaviorSubject, asyncScheduler } from 'rxjs';
 import { map, delay, subscribeOn, debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import type { ComponentsMap, Component, Components, SubscriptionToken } from './types';
+import type { ComponentsMap, Component, Components } from '../types';
+import type { SubscriptionToken } from './types';
+import type { StaticEntity } from '../types';
 
 function makeComponent(componentName : string, componentData : Component) : Component {
   switch(componentName) {
@@ -15,14 +17,9 @@ function makeComponent(componentName : string, componentData : Component) : Comp
   }
 }
 
-export interface StaticEntity {
-  id: string,
-  components: Components
-}
-
 export default class Entity implements StaticEntity {
   id: string;
-  sceneEntity: Object;
+  sceneEntity: StaticEntity;
   subscriptions : SubscriptionToken[] = []
   _switch = new BehaviorSubject(false);
   _components = new BehaviorSubject<Components>({});

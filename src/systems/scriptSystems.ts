@@ -2,7 +2,8 @@ import _ from 'lodash';
 import { merge } from 'rxjs';
 import { filter, map, skip, withLatestFrom } from 'rxjs/operators';
 import { every, flow, identity } from 'lodash/fp';
-import type { ReactToDataSystem, ComponentTypeString, Context } from './types';
+import type { ComponentTypeString } from '../types';
+import type { ReactToDataSystem, Context } from './types';
 import Entity from './Entity';
 import { assertNever } from '../utils/tsutils';
 

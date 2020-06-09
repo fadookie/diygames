@@ -1,14 +1,16 @@
 import _ from 'lodash';
 import produce from 'immer';
+import type { StaticScene, StaticEntity } from '../types';
 
-export const initialState = {
+export const initialState : StaticScene = {
   entities: [],
-  bgColor: 0,
+  bgColor: [0, 0, 0],
 };
 Object.freeze(initialState);
 
-export default (state, action) => {
-  if (action.entities && action.entities.find(e => e.id === 'Self')) throw new Error('Entity ID Self is reserved.');
+// TODO define action types
+export default (state : StaticScene, action : any) : StaticScene => {
+  if (action.entities && action.entities.find((e : StaticEntity) => e.id === 'Self')) throw new Error('Entity ID Self is reserved.');
   switch (action.type) {
     case 'addEntities': {
       return produce(state, next => {
@@ -34,7 +36,8 @@ export default (state, action) => {
     } case 'clearEntities': {
       return { ...state, entities: [] };
     } case 'setBgColor': {
-      return { ...state, bgColor: _.clamp(action.color, 0, 255) };
+      const color = _.clamp(action.color, 0, 255);
+      return { ...state, bgColor: [color, color, color] };
     } default:
       throw new Error(`Unknown action type:'${action.type}'`);
   }

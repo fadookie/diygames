@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import type { StaticEntity } from '../systems/Entity';
+import type { StaticEntity } from '../types';
 
 export const generateBaseEntity = (id : string) : StaticEntity => ({
   id,

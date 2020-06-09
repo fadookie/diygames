@@ -1,4 +1,5 @@
-import type { ExecutableSystem, Context, ComponentTypeString } from './types';
+import type { ComponentTypeString } from '../types';
+import type { ExecutableSystem, Context } from './types';
 import type Entity from './Entity';
 
 export default class RenderSystem implements ExecutableSystem {

@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { map, filter } from 'rxjs/operators';
-import type { ReactToGroupDataSystem, ComponentTypeString, Context } from './types';
+import type { ComponentTypeString } from '../types';
+import type { ReactToGroupDataSystem, Context } from './types';
 import type Entity from './Entity';
 
 export default class WinConditionSystem implements ReactToGroupDataSystem<boolean> {

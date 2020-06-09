@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import GamePlayer from './GamePlayer.js';
+import GamePlayer from './GamePlayer';
 import GameContext from '../state/GameContext';
 import CodeEditor from './CodeEditor';
 import { generateBaseEntity, generateTestSceneEntities } from './testSceneUtils';
