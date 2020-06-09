@@ -70,7 +70,7 @@ export interface SetSwitchAction {
   set: boolean,
 }
 
-export type Action = SetComponentAction | SetSwitchAction;
+export type TriggerAction = SetComponentAction | SetSwitchAction;
 
 export interface CheckSwitchCondition {
   type: 'Switch',
@@ -83,7 +83,7 @@ export type Condition = CheckSwitchCondition;
 export interface Script extends ComponentBase {
   triggers: Array<Trigger>,
   conditions: Array<Condition>,
-  actions: Array<Action>,
+  actions: Array<TriggerAction>,
 }
 
 export interface Script0 extends Script {
@@ -179,7 +179,36 @@ export interface ComponentsMap {
 export type Components = ComponentsBase;
 //#endregion Components Collection
 
-// TODO no any usage
-export type Reducer = (state : StaticScene, action: any) => StaticScene;
+//#region Redux
 
-export type GameDispatch = (action: any) => void;
+export interface AddEntitiesAction {
+  type: 'addEntities',
+  entities: StaticEntity[],
+}
+
+export interface SetEntitiesAction {
+  type: 'setEntities',
+  entities: StaticEntity[],
+}
+
+export interface RemoveEntitiesAction {
+  type: 'removeEntities',
+  entityIds: StaticEntity['id'],
+}
+
+export interface ClearEntitiesAction {
+  type: 'clearEntities',
+}
+
+export interface SetBgColorAction {
+  type: 'setBgColor',
+  color: number,
+}
+
+export type Action = AddEntitiesAction | SetEntitiesAction | RemoveEntitiesAction | ClearEntitiesAction | SetBgColorAction;
+
+export type Reducer = (state : StaticScene, action: Action) => StaticScene;
+
+export type GameDispatch = (action: Action) => void;
+
+//#endregion Redux

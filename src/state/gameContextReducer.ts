@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import produce from 'immer';
-import type { StaticScene, StaticEntity } from '../types';
+import type { Action, AddEntitiesAction, StaticScene, StaticEntity } from '../types';
+import { assertNever } from '../utils/tsutils';
 
 export const initialState : StaticScene = {
   entities: [],
@@ -8,9 +9,8 @@ export const initialState : StaticScene = {
 };
 Object.freeze(initialState);
 
-// TODO define action types
-export default (state : StaticScene, action : any) : StaticScene => {
-  if (action.entities && action.entities.find((e : StaticEntity) => e.id === 'Self')) throw new Error('Entity ID Self is reserved.');
+export default (state : StaticScene, action : Action) : StaticScene => {
+  if (Array.isArray((action as AddEntitiesAction).entities) && (action as AddEntitiesAction).entities.find((e : StaticEntity) => e.id === 'Self')) throw new Error('Entity ID Self is reserved.');
   switch (action.type) {
     case 'addEntities': {
       return produce(state, next => {
@@ -39,6 +39,6 @@ export default (state : StaticScene, action : any) : StaticScene => {
       const color = _.clamp(action.color, 0, 255);
       return { ...state, bgColor: [color, color, color] };
     } default:
-      throw new Error(`Unknown action type:'${action.type}'`);
+      assertNever(action);
   }
 };
