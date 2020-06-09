@@ -15,7 +15,12 @@ function makeComponent(componentName : string, componentData : Component) : Comp
   }
 }
 
-export default class Entity {
+export interface StaticEntity {
+  id: string,
+  components: Components
+}
+
+export default class Entity implements StaticEntity {
   id: string;
   sceneEntity: Object;
   subscriptions : SubscriptionToken[] = []

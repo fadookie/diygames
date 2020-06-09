@@ -57,6 +57,12 @@ export interface ReactToDataSystem<T> extends System {
   execute: (e : Entity, c : Context, data : T) => void,
 }
 
+export interface ReactToGroupDataSystem<T> extends System {
+  subscription?: Subscription,
+  reactToGroupData: (ents : Entity[], c : Context) => Observable<T>,
+  execute: (ents : Entity[], c : Context, data : T) => void,
+}
+
 //#endregion Misc
 
 
@@ -84,7 +90,6 @@ export type ActionType = 'SetComponent' | 'Switch';
 
 export interface SetComponentAction {
   type: 'SetComponent',
-  componentName: ComponentTypeString,
   component: Component,
 }
 
@@ -166,12 +171,16 @@ export interface Transform extends ComponentBase {
   }
 }
 
+export interface StopMovement extends ComponentBase {
+  type: 'StopMovement',
+}
+
 export interface WinCondition extends ComponentBase {
   type: 'WinCondition',
   expectedSwitchState: boolean,
 }
 
-export type Component = Collider | ColliderRuntime | DirectionalMovement | Renderer | Script0 | Script1 | Script2 | Script3 | Transform | WinCondition;
+export type Component = Collider | ColliderRuntime | DirectionalMovement | Renderer | Script0 | Script1 | Script2 | Script3 | StopMovement | Transform | WinCondition;
 
 export type ComponentTypeString = Component['type'];
 
@@ -190,6 +199,7 @@ export interface ComponentsMap {
   Script1: Script1,
   Script2: Script2,
   Script3: Script3,
+  StopMovement: StopMovement,
   Transform: Transform,
   WinCondition: WinCondition,
 }

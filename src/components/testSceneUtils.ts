@@ -1,6 +1,7 @@
 import _ from 'lodash';
+import type { StaticEntity } from '../systems/Entity';
 
-export const generateBaseEntity = (id) => ({
+export const generateBaseEntity = (id : string) : StaticEntity => ({
   id,
   components: {
     Transform: {
@@ -17,6 +18,10 @@ export const generateBaseEntity = (id) => ({
       type: 'Collider',
       colliderType: 'AABB',
     },
+    WinCondition: {
+      type: 'WinCondition',
+      expectedSwitchState: true,
+    },
     Script0: {
       type: 'Script0',
       triggers: [
@@ -26,7 +31,7 @@ export const generateBaseEntity = (id) => ({
       ],
       actions: [
         { type: 'SetComponent', component: { type: 'DirectionalMovement', velocity: { x: 1, y: 0 } } },
-        { type: 'Switch', target:'Self', set:true },
+        { type: 'Switch', set:true },
       ],
     },
     Script1: {
@@ -91,7 +96,7 @@ export const generateBaseEntity = (id) => ({
 //   },
 // });
 
-export const generateTestSceneEntities = () => ([
+export const generateTestSceneEntities = () : StaticEntity[] => ([
   {
     id: 'e0',
     components: {
@@ -157,6 +162,7 @@ export const generateTestSceneEntities = () => ([
         triggers: [
           { type: 'Switch', target:'e0', changingTo:true },
         ],
+        conditions: [],
         actions: [
           { type: 'Switch', set:true },
         ],
@@ -166,6 +172,7 @@ export const generateTestSceneEntities = () => ([
         triggers: [
           { type: 'Switch', target:'e0', changingTo:false },
         ],
+        conditions: [],
         actions: [
           { type: 'Switch', set:false },
         ],
@@ -175,6 +182,7 @@ export const generateTestSceneEntities = () => ([
         triggers: [
           { type: 'Switch', target:'Self', changingTo:true },
         ],
+        conditions: [],
         actions: [
           { type: 'SetComponent', component: { type: 'DirectionalMovement', velocity: { x: 0, y: 1 } } },
         ],
@@ -184,6 +192,7 @@ export const generateTestSceneEntities = () => ([
         triggers: [
           { type: 'Switch', target:'Self', changingTo:false },
         ],
+        conditions: [],
         actions: [
           { type: 'SetComponent', component: { type: 'StopMovement' }, },
           // { type: 'SetComponent', component: 'DirectionalMovement', velocity: { x: 0, y: -1 } },

@@ -6,16 +6,21 @@ import Entity from './Entity';
 import RenderSystem from './RenderSystem';
 import DirectionalMovementSystem from './DirectionalMovementSystem';
 import scriptSystems from './scriptSystems';
+import WinConditionSystem from './WinConditionSystem';
 import ColliderSetupSystem from './ColliderSetupSystem';
-import { System, ExecutableSystem, SetupSystem, ReactToDataSystem, Scene, GlobalEventBus, SubscriptionToken } from './types';
+import { System, ExecutableSystem, SetupSystem, ReactToDataSystem, ReactToGroupDataSystem, Scene, GlobalEventBus, SubscriptionToken } from './types';
 
 export default class EcsManager {
   setupSystems : SetupSystem[] = [
     new ColliderSetupSystem(),
   ]
 
-  reactiveSystems : ReactToDataSystem<any>[] = [
+  reactToDataSystems : ReactToDataSystem<any>[] = [
     ...scriptSystems,
+  ]
+
+  reactToGroupDataSystems : ReactToGroupDataSystem<any>[] = [
+    new WinConditionSystem(),
   ]
 
   updateSystems : ExecutableSystem[] = [
@@ -29,7 +34,7 @@ export default class EcsManager {
   playing = false
 
   get systems() : System[] {
-    return _.uniq([...this.setupSystems,  ...this.reactiveSystems, ...this.updateSystems, ...this.drawSystems]);
+    return _.uniq([...this.setupSystems,  ...this.reactToDataSystems, ...this.reactToGroupDataSystems, ...this.updateSystems, ...this.drawSystems]);
   }
 
   p5 : p5;
@@ -100,7 +105,7 @@ export default class EcsManager {
     }
 
     // Refresh subscriptions for reactToData systems
-    for(let system of this.reactiveSystems) {
+    for(let system of this.reactToDataSystems) {
       // console.log('@@@ refresh subs. playing:', this.playing, 'system:', system.tag, 'reactToData:', system.reactToData);
       if (this.playing) {
         // console.log('Refresh subscriptions for ', system.constructor.name, system.tag);
@@ -118,6 +123,17 @@ export default class EcsManager {
           e.subscriptions.push({ system, subscription });
         }
         // console.log('reactToData setup done for', system.constructor.name, ', ents:', system.entities);
+      }
+    }
+
+    for(let system of this.reactToGroupDataSystems) {
+      if (this.playing) {
+        if (system.subscription) {
+          system.subscription.unsubscribe();
+          system.subscription = undefined;
+        }
+        const observable = system.reactToGroupData(system.entities, this.context);
+        system.subscription = observable.subscribe(x => { system.execute(system.entities, this.context, x); })
       }
     }
   }
